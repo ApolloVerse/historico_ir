@@ -16,32 +16,38 @@
             --success: #0f9d58;
             --warning: #f4b400;
         }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
         body {
             background-color: #f8f9fa;
             color: var(--text);
         }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+        
         header {
             background-color: white;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             padding: 16px 0;
             margin-bottom: 20px;
         }
+        
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        
         .logo {
             font-size: 24px;
             font-weight: 700;
@@ -50,21 +56,25 @@
             align-items: center;
             gap: 8px;
         }
+        
         .tabs {
             display: flex;
             margin: 20px 0;
             border-bottom: 1px solid var(--gray-light);
             flex-wrap: wrap;
         }
+        
         .tab {
             padding: 12px 20px;
             cursor: pointer;
             font-weight: 500;
             position: relative;
         }
+        
         .tab.active {
             color: var(--primary);
         }
+        
         .tab.active::after {
             content: '';
             position: absolute;
@@ -74,12 +84,15 @@
             height: 3px;
             background-color: var(--primary);
         }
+        
         .tab-content {
             display: none;
         }
+        
         .tab-content.active {
             display: block;
         }
+        
         .card {
             background-color: white;
             border-radius: 8px;
@@ -87,6 +100,7 @@
             padding: 20px;
             margin-bottom: 20px;
         }
+        
         .button {
             background-color: var(--primary);
             color: white;
@@ -101,38 +115,48 @@
             gap: 6px;
             transition: background-color 0.2s;
         }
+        
         .button:hover {
             background-color: var(--primary-dark);
         }
+        
         .button.danger {
             background-color: var(--danger);
         }
+        
         .button.success {
             background-color: var(--success);
         }
+        
         .button.warning {
             background-color: var(--warning);
         }
+        
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
         }
+        
         th, td {
             padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
         }
+        
         th {
             background-color: var(--secondary);
             font-weight: 500;
         }
+        
         tr:hover {
             background-color: #e8f0fe;
         }
+        
         .modal {
             display: none;
             position: fixed;
@@ -145,6 +169,7 @@
             justify-content: center;
             align-items: center;
         }
+        
         .modal-content {
             background-color: white;
             border-radius: 8px;
@@ -154,6 +179,7 @@
             max-height: 90vh;
             overflow-y: auto;
         }
+        
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -161,10 +187,12 @@
             padding: 16px 20px;
             border-bottom: 1px solid var(--gray-light);
         }
+        
         .modal-title {
             font-size: 18px;
             font-weight: 500;
         }
+        
         .modal-close {
             background: none;
             border: none;
@@ -172,9 +200,11 @@
             cursor: pointer;
             color: #5f6368;
         }
+        
         .modal-body {
             padding: 20px;
         }
+        
         .modal-footer {
             padding: 16px 20px;
             border-top: 1px solid var(--gray-light);
@@ -182,15 +212,18 @@
             justify-content: flex-end;
             gap: 12px;
         }
+        
         .form-group {
             margin-bottom: 16px;
         }
+        
         .form-group label {
             display: block;
             margin-bottom: 6px;
             font-size: 14px;
             font-weight: 500;
         }
+        
         .form-control {
             width: 100%;
             padding: 8px 12px;
@@ -198,20 +231,24 @@
             border-radius: 4px;
             font-size: 14px;
         }
+        
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
         }
+        
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+        
         .actions {
             display: flex;
             gap: 6px;
         }
+        
         .notification {
             position: fixed;
             bottom: 20px;
@@ -229,19 +266,23 @@
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
         }
+        
         .notification.show {
             opacity: 1;
             transform: translateY(0);
         }
+        
         .notification.error {
             background-color: var(--danger);
         }
+        
         .asset-summary {
             margin-bottom: 30px;
             border: 1px solid var(--gray-light);
             border-radius: 8px;
             overflow: hidden;
         }
+        
         .asset-header {
             background-color: var(--primary);
             color: white;
@@ -250,10 +291,12 @@
             justify-content: space-between;
             align-items: center;
         }
+        
         .asset-name {
             font-weight: bold;
             font-size: 18px;
         }
+        
         .asset-details {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -261,46 +304,58 @@
             padding: 15px;
             background-color: white;
         }
+        
         .detail-item {
             display: flex;
             flex-direction: column;
         }
+        
         .detail-label {
             font-size: 12px;
             color: #5f6368;
         }
+        
         .detail-value {
             font-weight: 500;
             font-size: 16px;
         }
+        
         .summary-table {
             width: 100%;
         }
+        
         .summary-table th {
             background-color: var(--secondary);
         }
+        
         .summary-section {
             margin-top: 30px;
         }
+        
         .summary-section-title {
             font-size: 16px;
             font-weight: 500;
             margin-bottom: 10px;
             color: var(--primary);
         }
+        
         .positive {
             color: var(--success);
         }
+        
         .negative {
             color: var(--danger);
         }
+        
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
+            
             .asset-details {
                 grid-template-columns: 1fr;
             }
+            
             .tabs {
                 overflow-x: auto;
                 flex-wrap: nowrap;
@@ -317,6 +372,7 @@
             </div>
         </div>
     </header>
+    
     <div class="container">
         <div class="tabs">
             <div class="tab active" data-tab="assets">Ativos</div>
@@ -324,6 +380,7 @@
             <div class="tab" data-tab="dividends">Rendimentos</div>
             <div class="tab" data-tab="report">Relatório Completo</div>
         </div>
+        
         <!-- Aba de Ativos -->
         <div class="tab-content active" id="assets">
             <div class="card">
@@ -331,11 +388,11 @@
                     <i class="fas fa-plus"></i>
                     <span>Adicionar Ativo</span>
                 </button>
+                
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Código</th>
                                 <th>CNPJ</th>
@@ -352,6 +409,7 @@
                 </div>
             </div>
         </div>
+        
         <!-- Aba de Transações -->
         <div class="tab-content" id="transactions">
             <div class="card">
@@ -359,12 +417,12 @@
                     <i class="fas fa-plus"></i>
                     <span>Nova Transação</span>
                 </button>
+                
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Data da Compra</th>
-                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Quantidade</th>
                                 <th>Valor Unitário</th>
@@ -379,6 +437,7 @@
                 </div>
             </div>
         </div>
+        
         <!-- Aba de Rendimentos -->
         <div class="tab-content" id="dividends">
             <div class="card">
@@ -386,12 +445,12 @@
                     <i class="fas fa-plus"></i>
                     <span>Novo Rendimento</span>
                 </button>
+                
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Data Pagamento</th>
-                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Dividendos (R$)</th>
                                 <th>JCP (R$)</th>
@@ -406,6 +465,7 @@
                 </div>
             </div>
         </div>
+        
         <!-- Aba de Relatório Completo -->
         <div class="tab-content" id="report">
             <div class="card">
@@ -413,12 +473,14 @@
                     <i class="fas fa-print"></i>
                     <span>Imprimir Relatório</span>
                 </button>
+                
                 <div id="fullReport">
                     <!-- Relatório completo será gerado aqui -->
                 </div>
             </div>
         </div>
     </div>
+    
     <!-- Modal de Ativo -->
     <div class="modal" id="assetModal">
         <div class="modal-content">
@@ -431,31 +493,17 @@
                     <input type="hidden" id="assetId">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="assetType">Tipo de Ativo</label>
-                            <select class="form-control" id="assetType" required>
-                                <option value="">Selecione um tipo</option>
-                                <option value="acao">Ação</option>
-                                <option value="fii">FII</option>
-                                <option value="bdr">BDR</option>
-                                <option value="cdb">CDB</option>
-                                <option value="tesouro_direto">Tesouro Direto</option>
-                                <option value="crypto">Criptomoeda</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label for="assetName">Nome do Ativo</label>
                             <input type="text" class="form-control" id="assetName" placeholder="Ex: BANCO BRADESCO S.A" required>
                         </div>
-                    </div>
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="assetCode">Código</label>
                             <input type="text" class="form-control" id="assetCode" placeholder="Ex: BBDC4" required>
                         </div>
-                        <div class="form-group">
-                            <label for="assetCnpj">CNPJ</label>
-                            <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00" required>
-                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="assetCnpj">CNPJ</label>
+                        <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00" required>
                     </div>
                 </form>
             </div>
@@ -465,6 +513,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Modal de Transação -->
     <div class="modal" id="transactionModal">
         <div class="modal-content">
@@ -504,6 +553,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Modal de Rendimento -->
     <div class="modal" id="dividendModal">
         <div class="modal-content">
@@ -543,11 +593,13 @@
             </div>
         </div>
     </div>
+    
     <!-- Notificação -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle"></i>
         <span id="notificationMessage"></span>
     </div>
+    
     <script>
         // Banco de dados em memória
         let db = {
@@ -556,21 +608,25 @@
             dividends: [],
             nextId: 1
         };
+        
         // Formatar moeda
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
         }
+        
         // Formatar data
         function formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
             return date.toLocaleDateString('pt-BR');
         }
+        
         // Mostrar notificação
         function showNotification(message, isError = false) {
             const notification = document.getElementById('notification');
             const icon = notification.querySelector('i');
             const messageElement = document.getElementById('notificationMessage');
+            
             notification.classList.remove('error');
             if (isError) {
                 notification.classList.add('error');
@@ -578,12 +634,15 @@
             } else {
                 icon.className = 'fas fa-check-circle';
             }
+            
             messageElement.textContent = message;
             notification.classList.add('show');
+            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
+        
         // Gerenciamento de abas
         function setupTabs() {
             const tabs = document.querySelectorAll('.tab');
@@ -592,10 +651,12 @@
                     // Remover classe active de todas as abas e conteúdos
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
                     // Adicionar classe active à aba clicada e seu conteúdo
                     tab.classList.add('active');
                     const tabId = tab.getAttribute('data-tab');
                     document.getElementById(tabId).classList.add('active');
+                    
                     // Se for a aba de relatório, atualizar o relatório
                     if (tabId === 'report') {
                         renderFullReport();
@@ -603,10 +664,12 @@
                 });
             });
         }
+        
         // Função para ordenar ativos por nome (ordem crescente)
         function sortAssetsByName(assets) {
             return [...assets].sort((a, b) => a.name.localeCompare(b.name));
         }
+        
         // Função para ordenar transações por nome do ativo (ordem crescente)
         function sortTransactionsByAssetName(transactions) {
             return [...transactions].sort((a, b) => {
@@ -617,6 +680,7 @@
                 return nameA.localeCompare(nameB);
             });
         }
+        
         // Função para ordenar rendimentos por nome do ativo (ordem crescente)
         function sortDividendsByAssetName(dividends) {
             return [...dividends].sort((a, b) => {
@@ -627,21 +691,25 @@
                 return nameA.localeCompare(nameB);
             });
         }
+        
         // Renderizar tabela de ativos
         function renderAssets() {
             const tbody = document.getElementById('assetTable');
             tbody.innerHTML = '';
+            
             if (db.assets.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum ativo cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum ativo cadastrado</td></tr>';
                 return;
             }
+            
             // Ordenar ativos por nome (ordem crescente)
             const sortedAssets = sortAssetsByName(db.assets);
+            
             sortedAssets.forEach(asset => {
                 const assetData = calculateAssetData(asset.id);
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${getAssetTypeName(asset.type)}</td>
                     <td>${asset.name}</td>
                     <td>${asset.code}</td>
                     <td>${asset.cnpj}</td>
@@ -660,40 +728,47 @@
                 tbody.appendChild(row);
             });
         }
+        
         // Calcular dados do ativo (quantidade, preço médio, total investido)
         function calculateAssetData(assetId) {
             const assetTransactions = db.transactions.filter(t => t.assetId === assetId);
             let totalQuantity = 0;
             let totalInvested = 0;
+            
             assetTransactions.forEach(t => {
                 totalQuantity += t.quantity;
                 totalInvested += t.quantity * t.price;
             });
+            
             const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
+            
             return {
                 quantity: totalQuantity,
                 avgPrice,
                 totalInvested
             };
         }
+        
         // Renderizar tabela de transações
         function renderTransactions() {
             const tbody = document.getElementById('transactionTable');
             tbody.innerHTML = '';
+            
             if (db.transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhuma transação cadastrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhuma transação cadastrada</td></tr>';
                 return;
             }
+            
             // Ordenar transações por nome do ativo (ordem crescente)
             const sortedTransactions = sortTransactionsByAssetName(db.transactions);
+            
             sortedTransactions.forEach(transaction => {
                 const asset = db.assets.find(a => a.id === transaction.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
-                const assetType = asset ? getAssetTypeName(asset.type) : 'Tipo desconhecido';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${formatDate(transaction.date)}</td>
-                    <td>${assetType}</td>
                     <td>${assetName}</td>
                     <td>${transaction.quantity}</td>
                     <td>${formatCurrency(transaction.price)}</td>
@@ -707,25 +782,28 @@
                 tbody.appendChild(row);
             });
         }
+        
         // Renderizar tabela de rendimentos
         function renderDividends() {
             const tbody = document.getElementById('dividendTable');
             tbody.innerHTML = '';
+            
             if (db.dividends.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum rendimento cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum rendimento cadastrado</td></tr>';
                 return;
             }
+            
             // Ordenar rendimentos por nome do ativo (ordem crescente)
             const sortedDividends = sortDividendsByAssetName(db.dividends);
+            
             sortedDividends.forEach(dividend => {
                 const asset = db.assets.find(a => a.id === dividend.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
-                const assetType = asset ? getAssetTypeName(asset.type) : 'Tipo desconhecido';
                 const total = dividend.dividendValue + dividend.jcpValue;
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${formatDate(dividend.date)}</td>
-                    <td>${assetType}</td>
                     <td>${assetName}</td>
                     <td>${formatCurrency(dividend.dividendValue)}</td>
                     <td>${formatCurrency(dividend.jcpValue)}</td>
@@ -739,197 +817,201 @@
                 tbody.appendChild(row);
             });
         }
+        
         // Renderizar relatório completo
         function renderFullReport() {
             const reportContainer = document.getElementById('fullReport');
             reportContainer.innerHTML = '';
+            
             if (db.assets.length === 0) {
                 reportContainer.innerHTML = '<p style="text-align: center;">Nenhum ativo cadastrado para gerar relatório</p>';
                 return;
             }
-            // Agrupar ativos por tipo
-            const groupedAssets = {};
-            db.assets.forEach(asset => {
-                if (!groupedAssets[asset.type]) {
-                    groupedAssets[asset.type] = [];
+            
+            // Ordenar ativos por nome (ordem crescente)
+            const sortedAssets = sortAssetsByName(db.assets);
+            
+            sortedAssets.forEach(asset => {
+                const assetSection = document.createElement('div');
+                assetSection.className = 'asset-summary';
+                
+                // Calcular dados do ativo
+                const assetData = calculateAssetData(asset.id);
+                const assetTransactions = db.transactions
+                    .filter(t => t.assetId === asset.id)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar transações por data
+                
+                const assetDividends = db.dividends
+                    .filter(d => d.assetId === asset.id)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar rendimentos por data
+                
+                const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
+                const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
+                const totalIncome = totalDividends + totalJCP;
+                const yieldPercentage = assetData.totalInvested > 0 ? 
+                    (totalIncome / assetData.totalInvested * 100).toFixed(2) : 0;
+                
+                // Cabeçalho do ativo
+                const header = document.createElement('div');
+                header.className = 'asset-header';
+                header.innerHTML = `
+                    <div class="asset-name">${asset.name} (${asset.code})</div>
+                    <div>CNPJ: ${asset.cnpj}</div>
+                `;
+                assetSection.appendChild(header);
+                
+                // Detalhes resumidos
+                const details = document.createElement('div');
+                details.className = 'asset-details';
+                details.innerHTML = `
+                    <div class="detail-item">
+                        <span class="detail-label">Quantidade Total</span>
+                        <span class="detail-value">${assetData.quantity}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Preço Médio</span>
+                        <span class="detail-value">${formatCurrency(assetData.avgPrice)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total Investido</span>
+                        <span class="detail-value">${formatCurrency(assetData.totalInvested)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total Dividendos</span>
+                        <span class="detail-value">${formatCurrency(totalDividends)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total JCP</span>
+                        <span class="detail-value">${formatCurrency(totalJCP)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Rendimento Total</span>
+                        <span class="detail-value">${formatCurrency(totalIncome)} (${yieldPercentage}%)</span>
+                    </div>
+                `;
+                assetSection.appendChild(details);
+                
+                // Seção de Transações
+                if (assetTransactions.length > 0) {
+                    const transactionsSection = document.createElement('div');
+                    transactionsSection.className = 'summary-section';
+                    
+                    const sectionTitle = document.createElement('h3');
+                    sectionTitle.className = 'summary-section-title';
+                    sectionTitle.textContent = 'Transações';
+                    transactionsSection.appendChild(sectionTitle);
+                    
+                    const table = document.createElement('table');
+                    table.className = 'summary-table';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Quantidade</th>
+                                <th>Valor Unitário</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assetTransactions.map(t => `
+                                <tr>
+                                    <td>${formatDate(t.date)}</td>
+                                    <td>${t.quantity}</td>
+                                    <td>${formatCurrency(t.price)}</td>
+                                    <td>${formatCurrency(t.quantity * t.price)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    transactionsSection.appendChild(table);
+                    assetSection.appendChild(transactionsSection);
                 }
-                groupedAssets[asset.type].push(asset);
-            });
-            // Renderizar cada grupo
-            Object.keys(groupedAssets).forEach(type => {
-                const typeSection = document.createElement('div');
-                typeSection.className = 'summary-section';
-                const typeName = getAssetTypeName(type);
-                const sectionTitle = document.createElement('h2');
-                sectionTitle.className = 'summary-section-title';
-                sectionTitle.textContent = typeName;
-                typeSection.appendChild(sectionTitle);
-                // Ordenar ativos por nome (ordem crescente)
-                const sortedAssets = sortAssetsByName(groupedAssets[type]);
-                sortedAssets.forEach(asset => {
-                    const assetSection = document.createElement('div');
-                    assetSection.className = 'asset-summary';
-                    // Calcular dados do ativo
-                    const assetData = calculateAssetData(asset.id);
-                    const assetTransactions = db.transactions
-                        .filter(t => t.assetId === asset.id)
-                        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar transações por data
-                    const assetDividends = db.dividends
-                        .filter(d => d.assetId === asset.id)
-                        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar rendimentos por data
-                    const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
-                    const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
-                    const totalIncome = totalDividends + totalJCP;
-                    const yieldPercentage = assetData.totalInvested > 0 ? 
-                        (totalIncome / assetData.totalInvested * 100).toFixed(2) : 0;
-                    // Cabeçalho do ativo
-                    const header = document.createElement('div');
-                    header.className = 'asset-header';
-                    header.innerHTML = `
-                        <div class="asset-name">${asset.name} (${asset.code})</div>
-                        <div>CNPJ: ${asset.cnpj}</div>
-                    `;
-                    assetSection.appendChild(header);
-                    // Detalhes resumidos
-                    const details = document.createElement('div');
-                    details.className = 'asset-details';
-                    details.innerHTML = `
-                        <div class="detail-item">
-                            <span class="detail-label">Quantidade Total</span>
-                            <span class="detail-value">${assetData.quantity}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Preço Médio</span>
-                            <span class="detail-value">${formatCurrency(assetData.avgPrice)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Total Investido</span>
-                            <span class="detail-value">${formatCurrency(assetData.totalInvested)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Total Dividendos</span>
-                            <span class="detail-value">${formatCurrency(totalDividends)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Total JCP</span>
-                            <span class="detail-value">${formatCurrency(totalJCP)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Rendimento Total</span>
-                            <span class="detail-value">${formatCurrency(totalIncome)} (${yieldPercentage}%)</span>
-                        </div>
-                    `;
-                    assetSection.appendChild(details);
-                    // Seção de Transações
-                    if (assetTransactions.length > 0) {
-                        const transactionsSection = document.createElement('div');
-                        transactionsSection.className = 'summary-section';
-                        const sectionTitle = document.createElement('h3');
-                        sectionTitle.className = 'summary-section-title';
-                        sectionTitle.textContent = 'Transações';
-                        transactionsSection.appendChild(sectionTitle);
-                        const table = document.createElement('table');
-                        table.className = 'summary-table';
-                        table.innerHTML = `
-                            <thead>
+                
+                // Seção de Rendimentos
+                if (assetDividends.length > 0) {
+                    const dividendsSection = document.createElement('div');
+                    dividendsSection.className = 'summary-section';
+                    
+                    const sectionTitle = document.createElement('h3');
+                    sectionTitle.className = 'summary-section-title';
+                    sectionTitle.textContent = 'Rendimentos';
+                    dividendsSection.appendChild(sectionTitle);
+                    
+                    const table = document.createElement('table');
+                    table.className = 'summary-table';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dividendos</th>
+                                <th>JCP</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assetDividends.map(d => {
+                                const total = d.dividendValue + d.jcpValue;
+                                return `
                                 <tr>
-                                    <th>Data</th>
-                                    <th>Quantidade</th>
-                                    <th>Valor Unitário</th>
-                                    <th>Total</th>
+                                    <td>${formatDate(d.date)}</td>
+                                    <td>${formatCurrency(d.dividendValue)}</td>
+                                    <td>${formatCurrency(d.jcpValue)}</td>
+                                    <td>${formatCurrency(total)}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${assetTransactions.map(t => `
-                                    <tr>
-                                        <td>${formatDate(t.date)}</td>
-                                        <td>${t.quantity}</td>
-                                        <td>${formatCurrency(t.price)}</td>
-                                        <td>${formatCurrency(t.quantity * t.price)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        `;
-                        transactionsSection.appendChild(table);
-                        assetSection.appendChild(transactionsSection);
-                    }
-                    // Seção de Rendimentos
-                    if (assetDividends.length > 0) {
-                        const dividendsSection = document.createElement('div');
-                        dividendsSection.className = 'summary-section';
-                        const sectionTitle = document.createElement('h3');
-                        sectionTitle.className = 'summary-section-title';
-                        sectionTitle.textContent = 'Rendimentos';
-                        dividendsSection.appendChild(sectionTitle);
-                        const table = document.createElement('table');
-                        table.className = 'summary-table';
-                        table.innerHTML = `
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Dividendos</th>
-                                    <th>JCP</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${assetDividends.map(d => {
-                                    const total = d.dividendValue + d.jcpValue;
-                                    return `
-                                    <tr>
-                                        <td>${formatDate(d.date)}</td>
-                                        <td>${formatCurrency(d.dividendValue)}</td>
-                                        <td>${formatCurrency(d.jcpValue)}</td>
-                                        <td>${formatCurrency(total)}</td>
-                                    </tr>
-                                    `;
-                                }).join('')}
-                                <tr style="font-weight: bold;">
-                                    <td>Total</td>
-                                    <td>${formatCurrency(totalDividends)}</td>
-                                    <td>${formatCurrency(totalJCP)}</td>
-                                    <td>${formatCurrency(totalIncome)}</td>
-                                </tr>
-                            </tbody>
-                        `;
-                        dividendsSection.appendChild(table);
-                        assetSection.appendChild(dividendsSection);
-                    }
-                    typeSection.appendChild(assetSection);
-                });
-                reportContainer.appendChild(typeSection);
+                                `;
+                            }).join('')}
+                            <tr style="font-weight: bold;">
+                                <td>Total</td>
+                                <td>${formatCurrency(totalDividends)}</td>
+                                <td>${formatCurrency(totalJCP)}</td>
+                                <td>${formatCurrency(totalIncome)}</td>
+                            </tr>
+                        </tbody>
+                    `;
+                    dividendsSection.appendChild(table);
+                    assetSection.appendChild(dividendsSection);
+                }
+                
+                reportContainer.appendChild(assetSection);
             });
         }
+        
         // Atualizar dropdowns de ativos
         function updateAssetDropdowns() {
             const transactionAssetSelect = document.getElementById('transactionAsset');
             const dividendAssetSelect = document.getElementById('dividendAsset');
+            
             // Limpar opções existentes
             transactionAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
+            
             // Ordenar ativos por nome (ordem crescente)
             const sortedAssets = sortAssetsByName(db.assets);
+            
             // Adicionar opções
             sortedAssets.forEach(asset => {
                 const option = document.createElement('option');
                 option.value = asset.id;
                 option.textContent = `${asset.name} (${asset.code})`;
+                
                 transactionAssetSelect.appendChild(option.cloneNode(true));
                 dividendAssetSelect.appendChild(option);
             });
         }
+        
         // Modal de ativo
         function openAssetModal(assetId = null) {
             const modal = document.getElementById('assetModal');
             const form = document.getElementById('assetForm');
             const title = document.getElementById('assetModalTitle');
+            
             form.reset();
+            
             if (assetId) {
                 title.textContent = 'Editar Ativo';
                 const asset = db.assets.find(a => a.id === assetId);
                 if (asset) {
                     document.getElementById('assetId').value = asset.id;
-                    document.getElementById('assetType').value = asset.type;
                     document.getElementById('assetName').value = asset.name;
                     document.getElementById('assetCode').value = asset.code;
                     document.getElementById('assetCnpj').value = asset.cnpj;
@@ -938,103 +1020,258 @@
                 title.textContent = 'Adicionar Ativo';
                 document.getElementById('assetId').value = '';
             }
+            
             modal.style.display = 'flex';
         }
+        
         function saveAsset() {
             const form = document.getElementById('assetForm');
             const assetId = document.getElementById('assetId').value;
-            const type = document.getElementById('assetType').value;
             const name = document.getElementById('assetName').value.trim();
             const code = document.getElementById('assetCode').value.trim();
             const cnpj = document.getElementById('assetCnpj').value.trim();
-            if (!type || !name || !code || !cnpj) {
+            
+            if (!name || !code || !cnpj) {
                 showNotification('Preencha todos os campos obrigatórios', true);
                 return;
             }
+            
             const assetData = {
                 id: assetId ? parseInt(assetId) : db.nextId++,
-                type,
                 name,
                 code,
                 cnpj
-                };
-                if (assetId) {
-                    // Editar ativo existente
-                    const index = db.assets.findIndex(a => a.id === parseInt(assetId));
-                    if (index !== -1) {
-                        db.assets[index] = assetData;
-                        showNotification('Ativo atualizado com sucesso!');
-                    }
-                } else {
-                    // Adicionar novo ativo
-                    db.assets.push(assetData);
-                    showNotification('Ativo adicionado com sucesso!');
-                }
-                document.getElementById('assetModal').style.display = 'none';
-                renderAssets();
-                updateAssetDropdowns();
-                renderFullReport();
-            }
-        }
-
-        // Função para obter nome do tipo de ativo
-        function getAssetTypeName(type) {
-            const types = {
-                acao: 'Ação',
-                fii: 'FII',
-                bdr: 'BDR',
-                cdb: 'CDB',
-                tesouro_direto: 'Tesouro Direto',
-                crypto: 'Criptomoeda'
             };
-            return types[type] || 'Tipo desconhecido';
+            
+            if (assetId) {
+                // Editar ativo existente
+                const index = db.assets.findIndex(a => a.id === parseInt(assetId));
+                if (index !== -1) {
+                    db.assets[index] = assetData;
+                    showNotification('Ativo atualizado com sucesso!');
+                }
+            } else {
+                // Adicionar novo ativo
+                db.assets.push(assetData);
+                showNotification('Ativo adicionado com sucesso!');
+            }
+            
+            document.getElementById('assetModal').style.display = 'none';
+            renderAssets();
+            updateAssetDropdowns();
+            renderFullReport();
         }
-
-        // Atualizar todas as tabelas e dropdowns
-        function updateAllTables() {
+        
+        function editAsset(id) {
+            openAssetModal(id);
+        }
+        
+        function deleteAsset(id) {
+            if (!confirm('Tem certeza que deseja excluir este ativo?')) return;
+            
+            // Verificar se há transações ou rendimentos associados
+            const hasTransactions = db.transactions.some(t => t.assetId === id);
+            const hasDividends = db.dividends.some(d => d.assetId === id);
+            
+            if (hasTransactions || hasDividends) {
+                showNotification('Não é possível excluir ativo com transações ou rendimentos associados', true);
+                return;
+            }
+            
+            db.assets = db.assets.filter(a => a.id !== id);
+            showNotification('Ativo excluído com sucesso!');
+            renderAssets();
+            updateAssetDropdowns();
+            renderFullReport();
+        }
+        
+        // Modal de transação
+        function openTransactionModal() {
+            const modal = document.getElementById('transactionModal');
+            const form = document.getElementById('transactionForm');
+            
+            form.reset();
+            document.getElementById('transactionDate').valueAsDate = new Date();
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveTransaction() {
+            const form = document.getElementById('transactionForm');
+            const date = document.getElementById('transactionDate').value;
+            const assetId = document.getElementById('transactionAsset').value;
+            const quantity = parseFloat(document.getElementById('transactionQuantity').value);
+            const price = parseFloat(document.getElementById('transactionPrice').value);
+            
+            if (!date || !assetId || isNaN(quantity) || isNaN(price)) {
+                showNotification('Preencha todos os campos obrigatórios', true);
+                return;
+            }
+            
+            if (quantity <= 0 || price <= 0) {
+                showNotification('Quantidade e valor devem ser maiores que zero', true);
+                return;
+            }
+            
+            const transaction = {
+                id: db.nextId++,
+                date,
+                assetId: parseInt(assetId),
+                quantity,
+                price
+            };
+            
+            db.transactions.push(transaction);
+            showNotification('Transação adicionada com sucesso!');
+            document.getElementById('transactionModal').style.display = 'none';
+            renderTransactions();
+            renderAssets();
+            renderFullReport();
+        }
+        
+        function deleteTransaction(id) {
+            if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+            
+            db.transactions = db.transactions.filter(t => t.id !== id);
+            showNotification('Transação excluída com sucesso!');
+            renderTransactions();
+            renderAssets();
+            renderFullReport();
+        }
+        
+        // Modal de rendimento
+        function openDividendModal() {
+            const modal = document.getElementById('dividendModal');
+            const form = document.getElementById('dividendForm');
+            
+            form.reset();
+            document.getElementById('dividendDate').valueAsDate = new Date();
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveDividend() {
+            const form = document.getElementById('dividendForm');
+            const date = document.getElementById('dividendDate').value;
+            const assetId = document.getElementById('dividendAsset').value;
+            const dividendValue = parseFloat(document.getElementById('dividendValue').value);
+            const jcpValue = parseFloat(document.getElementById('jcpValue').value);
+            
+            if (!date || !assetId || isNaN(dividendValue) || isNaN(jcpValue)) {
+                showNotification('Preencha todos os campos obrigatórios', true);
+                return;
+            }
+            
+            if (dividendValue < 0 || jcpValue < 0) {
+                showNotification('Valores não podem ser negativos', true);
+                return;
+            }
+            
+            const dividend = {
+                id: db.nextId++,
+                date,
+                assetId: parseInt(assetId),
+                dividendValue,
+                jcpValue
+            };
+            
+            db.dividends.push(dividend);
+            showNotification('Rendimento adicionado com sucesso!');
+            document.getElementById('dividendModal').style.display = 'none';
+            renderDividends();
+            renderFullReport();
+        }
+        
+        function deleteDividend(id) {
+            if (!confirm('Tem certeza que deseja excluir este rendimento?')) return;
+            
+            db.dividends = db.dividends.filter(d => d.id !== id);
+            showNotification('Rendimento excluído com sucesso!');
+            renderDividends();
+            renderFullReport();
+        }
+        
+        // Função para imprimir relatório
+        function printReport() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Relatório de Ativos</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .asset-summary { margin-bottom: 30px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+                        .asset-header { background-color: #1a73e8; color: white; padding: 15px 20px; }
+                        .asset-name { font-weight: bold; font-size: 18px; }
+                        .asset-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; padding: 15px; }
+                        .detail-label { font-size: 12px; color: #666; }
+                        .detail-value { font-weight: 500; font-size: 16px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+                        th { background-color: #f1f3f4; }
+                        .summary-section { margin-top: 20px; }
+                        .summary-section-title { font-size: 16px; font-weight: bold; color: #1a73e8; margin-bottom: 10px; }
+                        @media print {
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Relatório Completo de Ativos</h1>
+                    <p>Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
+                    ${document.getElementById('fullReport').innerHTML}
+                    <button class="no-print" onclick="window.print()">Imprimir</button>
+                    <button class="no-print" onclick="window.close()">Fechar</button>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs();
             renderAssets();
             renderTransactions();
             renderDividends();
             updateAssetDropdowns();
             renderFullReport();
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            setupTabs();
-            updateAllTables();
-
+            
             // Botões de abertura de modal
             document.getElementById('addAssetBtn').addEventListener('click', () => openAssetModal());
             document.getElementById('addTransactionBtn').addEventListener('click', openTransactionModal);
             document.getElementById('addDividendBtn').addEventListener('click', openDividendModal);
-
+            
             // Botão de imprimir relatório
             document.getElementById('printReportBtn').addEventListener('click', printReport);
-
+            
             // Botões de salvar
             document.getElementById('saveAssetBtn').addEventListener('click', saveAsset);
             document.getElementById('saveTransactionBtn').addEventListener('click', saveTransaction);
             document.getElementById('saveDividendBtn').addEventListener('click', saveDividend);
-
+            
             // Botões de cancelar
             document.getElementById('cancelAssetBtn').addEventListener('click', () => {
                 document.getElementById('assetModal').style.display = 'none';
             });
+            
             document.getElementById('cancelTransactionBtn').addEventListener('click', () => {
                 document.getElementById('transactionModal').style.display = 'none';
             });
+            
             document.getElementById('cancelDividendBtn').addEventListener('click', () => {
                 document.getElementById('dividendModal').style.display = 'none';
             });
-
+            
             // Botões de fechar modal
             document.getElementById('closeAssetModal').addEventListener('click', () => {
                 document.getElementById('assetModal').style.display = 'none';
             });
+            
             document.getElementById('closeTransactionModal').addEventListener('click', () => {
                 document.getElementById('transactionModal').style.display = 'none';
             });
+            
             document.getElementById('closeDividendModal').addEventListener('click', () => {
                 document.getElementById('dividendModal').style.display = 'none';
             });
@@ -1042,20 +1279,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
