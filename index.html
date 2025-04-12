@@ -15,6 +15,7 @@
             --danger: #d93025;
             --success: #0f9d58;
             --warning: #f4b400;
+            --mobile-breakpoint: 768px;
         }
         
         * {
@@ -40,6 +41,7 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             padding: 16px 0;
             margin-bottom: 20px;
+            position: relative;
         }
         
         .header-content {
@@ -57,6 +59,7 @@
             gap: 8px;
         }
         
+        /* Menu para desktop */
         .tabs {
             display: flex;
             margin: 20px 0;
@@ -83,6 +86,43 @@
             right: 0;
             height: 3px;
             background-color: var(--primary);
+        }
+        
+        /* Menu para mobile */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .mobile-tabs {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            flex-direction: column;
+        }
+        
+        .mobile-tabs.show {
+            display: flex;
+        }
+        
+        .mobile-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .mobile-tab.active {
+            background-color: #e8f0fe;
+            color: var(--primary);
         }
         
         .tab-content {
@@ -140,11 +180,13 @@
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
         }
         
         th, td {
@@ -368,23 +410,53 @@
         .asset-color-tesouro { background-color: #673AB7; }
         .asset-color-crypto { background-color: #FF5722; }
         
-        /* Layout horizontal para o relatório */
-        .report-container {
+        /* Layout do relatório com abas */
+        .report-tabs {
             display: flex;
-            flex-direction: column;
-            width: 100%;
-            overflow-x: auto;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
+        .report-tab {
+            padding: 8px 15px;
+            background-color: var(--secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .report-tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .report-tab-content {
+            display: none;
+        }
+        
+        .report-tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Layout horizontal para o relatório */
         .report-categories {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
         
         .report-category {
-            flex: 1;
-            min-width: 250px;
+            flex: 1 0 280px;
             border: 1px solid var(--gray-light);
             border-radius: 8px;
             overflow: hidden;
@@ -412,11 +484,30 @@
             padding: 8px 10px;
             color: white;
             font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .report-asset-header i {
+            transition: transform 0.2s;
+        }
+        
+        .report-asset-header.collapsed i {
+            transform: rotate(-90deg);
         }
         
         .report-asset-details {
             padding: 10px;
             background-color: white;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .report-asset-details.collapsed {
+            max-height: 0;
+            padding: 0 10px;
         }
         
         .report-asset-row {
@@ -473,7 +564,16 @@
             font-size: 14px;
         }
         
+        /* Estilos específicos para mobile */
         @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .tabs {
+                display: none;
+            }
+            
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -482,17 +582,35 @@
                 grid-template-columns: 1fr;
             }
             
-            .tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-            
             .report-categories {
                 flex-direction: column;
             }
             
             .report-category {
                 min-width: 100%;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+            
+            .report-summary-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .report-summary-item {
+                min-width: 100%;
+            }
+            
+            .button {
+                padding: 10px 16px;
+                font-size: 15px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 14px;
             }
         }
     </style>
@@ -504,17 +622,31 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Gerenciador de Ativos para IR</span>
             </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Menu para desktop -->
+        <div class="container">
+            <div class="tabs">
+                <div class="tab active" data-tab="assets">Ativos</div>
+                <div class="tab" data-tab="transactions">Transações</div>
+                <div class="tab" data-tab="dividends">Rendimentos</div>
+                <div class="tab" data-tab="report">Relatório Completo</div>
+            </div>
+        </div>
+        
+        <!-- Menu para mobile -->
+        <div class="mobile-tabs" id="mobileTabs">
+            <div class="mobile-tab active" data-tab="assets">Ativos</div>
+            <div class="mobile-tab" data-tab="transactions">Transações</div>
+            <div class="mobile-tab" data-tab="dividends">Rendimentos</div>
+            <div class="mobile-tab" data-tab="report">Relatório Completo</div>
         </div>
     </header>
     
     <div class="container">
-        <div class="tabs">
-            <div class="tab active" data-tab="assets">Ativos</div>
-            <div class="tab" data-tab="transactions">Transações</div>
-            <div class="tab" data-tab="dividends">Rendimentos</div>
-            <div class="tab" data-tab="report">Relatório Completo</div>
-        </div>
-        
         <!-- Aba de Ativos -->
         <div class="tab-content active" id="assets">
             <div class="card">
@@ -610,6 +742,10 @@
                     <i class="fas fa-print"></i>
                     <span>Imprimir Relatório</span>
                 </button>
+                
+                <div class="report-tabs" id="reportTabs">
+                    <!-- Abas serão geradas dinamicamente -->
+                </div>
                 
                 <div id="fullReport">
                     <!-- Relatório completo será gerado aqui -->
@@ -752,7 +888,7 @@
     </div>
     
     <script>
-        // Banco de dados em memória
+        // Banco de dados em memória (será carregado do localStorage)
         let db = {
             assets: [],
             transactions: [],
@@ -789,6 +925,23 @@
             "Tesouro Direto": "asset-color-tesouro",
             "Crypto": "asset-color-crypto"
         };
+        
+        // Salvar dados no localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('investmentManagerDB', JSON.stringify(db));
+        }
+        
+        // Carregar dados do localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('investmentManagerDB');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                db.assets = parsedData.assets || [];
+                db.transactions = parsedData.transactions || [];
+                db.dividends = parsedData.dividends || [];
+                db.nextId = parsedData.nextId || 1;
+            }
+        }
         
         // Converter string para número, aceitando tanto ponto quanto vírgula como separador decimal
         function parseNumber(value) {
@@ -852,6 +1005,7 @@
         
         // Gerenciamento de abas
         function setupTabs() {
+            // Abas para desktop
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -869,6 +1023,34 @@
                         renderFullReport();
                     }
                 });
+            });
+            
+            // Abas para mobile
+            const mobileTabs = document.querySelectorAll('.mobile-tab');
+            mobileTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remover classe active de todas as abas e conteúdos
+                    document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba clicada e seu conteúdo
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Fechar menu mobile
+                    document.getElementById('mobileTabs').classList.remove('show');
+                    
+                    // Se for a aba de relatório, atualizar o relatório
+                    if (tabId === 'report') {
+                        renderFullReport();
+                    }
+                });
+            });
+            
+            // Botão do menu mobile
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                document.getElementById('mobileTabs').classList.toggle('show');
             });
         }
         
@@ -1104,7 +1286,49 @@
             });
         }
         
-        // Renderizar relatório completo com layout horizontal
+        // Renderizar abas do relatório
+        function renderReportTabs() {
+            const tabsContainer = document.getElementById('reportTabs');
+            tabsContainer.innerHTML = '';
+            
+            // Adicionar aba para cada tipo de ativo que existe
+            assetTypes.forEach(type => {
+                const assetsOfType = db.assets.filter(asset => asset.type === type);
+                if (assetsOfType.length > 0) {
+                    const tab = document.createElement('div');
+                    tab.className = 'report-tab';
+                    tab.textContent = type;
+                    tab.dataset.tab = type;
+                    tab.addEventListener('click', () => {
+                        // Alternar aba ativa
+                        document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        
+                        // Mostrar conteúdo da aba selecionada
+                        document.querySelectorAll('.report-tab-content').forEach(c => c.classList.remove('active'));
+                        document.getElementById(`report-tab-${type}`).classList.add('active');
+                    });
+                    
+                    tabsContainer.appendChild(tab);
+                }
+            });
+            
+            // Adicionar aba de resumo
+            const summaryTab = document.createElement('div');
+            summaryTab.className = 'report-tab active';
+            summaryTab.textContent = 'Resumo';
+            summaryTab.dataset.tab = 'summary';
+            summaryTab.addEventListener('click', () => {
+                document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+                summaryTab.classList.add('active');
+                
+                document.querySelectorAll('.report-tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('report-tab-summary').classList.add('active');
+            });
+            tabsContainer.appendChild(summaryTab);
+        }
+        
+        // Renderizar relatório completo com abas
         function renderFullReport() {
             const reportContainer = document.getElementById('fullReport');
             reportContainer.innerHTML = '';
@@ -1114,46 +1338,29 @@
                 return;
             }
             
-            // Criar container principal do relatório
-            const reportWrapper = document.createElement('div');
-            reportWrapper.className = 'report-container';
-            reportContainer.appendChild(reportWrapper);
-            
-            // Agrupar ativos por tipo
-            const assetsByType = {};
-            assetTypes.forEach(type => {
-                assetsByType[type] = db.assets.filter(asset => asset.type === type);
-            });
-            
-            // Criar container para as categorias (layout horizontal)
-            const categoriesContainer = document.createElement('div');
-            categoriesContainer.className = 'report-categories';
-            reportWrapper.appendChild(categoriesContainer);
+            // Renderizar abas
+            renderReportTabs();
             
             // Variáveis para totais gerais
             let totalInvested = 0;
             let totalDividends = 0;
             let totalJCP = 0;
             
-            // Processar cada categoria
-            for (const [type, assets] of Object.entries(assetsByType)) {
-                if (assets.length === 0) continue;
+            // Processar cada categoria para criar conteúdo das abas
+            assetTypes.forEach(type => {
+                const assetsOfType = db.assets.filter(asset => asset.type === type);
+                if (assetsOfType.length === 0) return;
                 
-                // Criar container para a categoria
-                const categoryContainer = document.createElement('div');
-                categoryContainer.className = 'report-category';
-                categoriesContainer.appendChild(categoryContainer);
+                // Criar container para a aba
+                const tabContent = document.createElement('div');
+                tabContent.className = 'report-tab-content';
+                tabContent.id = `report-tab-${type}`;
+                reportContainer.appendChild(tabContent);
                 
-                // Cabeçalho da categoria
-                const categoryHeader = document.createElement('div');
-                categoryHeader.className = 'report-category-header ' + assetTypeClasses[type];
-                categoryHeader.textContent = type;
-                categoryContainer.appendChild(categoryHeader);
-                
-                // Container para os ativos da categoria
+                // Criar container para os ativos da categoria
                 const assetsContainer = document.createElement('div');
                 assetsContainer.className = 'report-assets';
-                categoryContainer.appendChild(assetsContainer);
+                tabContent.appendChild(assetsContainer);
                 
                 // Variáveis para totais da categoria
                 let categoryTotalInvested = 0;
@@ -1161,481 +1368,488 @@
                 let categoryTotalJCP = 0;
                 
                 // Processar cada ativo da categoria
-                const sortedAssets = sortAssets(assets);
+                const sortedAssets = sortAssets(assetsOfType);
                 
                 sortedAssets.forEach(asset => {
                     // Calcular dados do ativo
                     const assetData = calculateAssetData(asset.id);
-                    const assetDividends = db.dividends
-                        .filter(d => d.assetId === asset.id)
-                        .sort((a, b) => new Date(a.date) - new Date(b.date));
-                    
-                    const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
-                    const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
-                    const totalIncome = totalDividends + totalJCP;
-                    const yieldPercentage = assetData.totalInvested > 0 ? 
-                        (totalIncome / assetData.totalInvested * 100).toFixed(2) : 0;
-                    
-                    // Atualizar totais da categoria
-                    categoryTotalInvested += assetData.totalInvested;
-                    categoryTotalDividends += totalDividends;
-                    categoryTotalJCP += totalJCP;
-                    
-                    // Criar card do ativo
-                    const assetCard = document.createElement('div');
-                    assetCard.className = 'report-asset';
-                    assetsContainer.appendChild(assetCard);
-                    
-                    // Cabeçalho do ativo
-                    const assetHeader = document.createElement('div');
-                    assetHeader.className = 'report-asset-header ' + assetTypeClasses[type];
-                    assetHeader.innerHTML = `
-                        <div>${asset.name} (${asset.code})</div>
-                        <div style="font-size: 11px;">${asset.cnpj || ''}</div>
-                    `;
-                    assetCard.appendChild(assetHeader);
-                    
-                    // Detalhes do ativo
-                    const assetDetails = document.createElement('div');
-                    assetDetails.className = 'report-asset-details';
-                    
-                    // Adicionar linhas de detalhes
-                    function addDetailRow(label, value) {
-                        const row = document.createElement('div');
-                        row.className = 'report-asset-row';
-                        row.innerHTML = `
-                            <span class="report-asset-label">${label}</span>
-                            <span class="report-asset-value">${value}</span>
-                        `;
-                        assetDetails.appendChild(row);
-                    }
-                    
-                    addDetailRow('Quantidade', formatNumber(assetData.quantity));
-                    addDetailRow('Preço Médio', formatCurrency(assetData.avgPrice));
-                    addDetailRow('Total Investido', formatCurrency(assetData.totalInvested));
-                    addDetailRow('Dividendos', formatCurrency(totalDividends));
-                    addDetailRow('JCP', formatCurrency(totalJCP));
-                    addDetailRow('Rendimento Total', `${formatCurrency(totalIncome)} (${yieldPercentage}%)`);
-                    
-                    assetCard.appendChild(assetDetails);
-                });
+                    const assetDividends =
+';
+row.innerHTML = <span class="report-asset-label">${label}</span> <span class="report-asset-value">${value}</span> ;
+assetDetails.appendChild(row);
+}
+                addDetailRow('Quantidade', formatNumber(assetData.quantity));
+                addDetailRow('Preço Médio', formatCurrency(assetData.avgPrice));
+                addDetailRow('Total Investido', formatCurrency(assetData.totalInvested));
+                addDetailRow('Dividendos', formatCurrency(totalDividends));
+                addDetailRow('JCP', formatCurrency(totalJCP));
+                addDetailRow('Rendimento Total', `${formatCurrency(totalIncome)} (${yieldPercentage}%)`);
                 
-                // Adicionar resumo da categoria
-                const categoryTotalIncome = categoryTotalDividends + categoryTotalJCP;
-                const categoryYieldPercentage = categoryTotalInvested > 0 ? 
-                    (categoryTotalIncome / categoryTotalInvested * 100).toFixed(2) : 0;
-                
-                const categorySummary = document.createElement('div');
-                categorySummary.className = 'report-asset';
-                categorySummary.innerHTML = `
-                    <div class="report-asset-header ${assetTypeClasses[type]}" style="font-weight: bold;">
-                        Resumo ${type}
-                    </div>
-                    <div class="report-asset-details">
-                        <div class="report-asset-row">
-                            <span class="report-asset-label">Total Investido</span>
-                            <span class="report-asset-value">${formatCurrency(categoryTotalInvested)}</span>
-                        </div>
-                        <div class="report-asset-row">
-                            <span class="report-asset-label">Total Dividendos</span>
-                            <span class="report-asset-value">${formatCurrency(categoryTotalDividends)}</span>
-                        </div>
-                        <div class="report-asset-row">
-                            <span class="report-asset-label">Total JCP</span>
-                            <span class="report-asset-value">${formatCurrency(categoryTotalJCP)}</span>
-                        </div>
-                        <div class="report-asset-row">
-                            <span class="report-asset-label">Rendimento Total</span>
-                            <span class="report-asset-value">${formatCurrency(categoryTotalIncome)} (${categoryYieldPercentage}%)</span>
-                        </div>
-                    </div>
-                `;
-                assetsContainer.appendChild(categorySummary);
-                
-                // Atualizar totais gerais
-                totalInvested += categoryTotalInvested;
-                totalDividends += categoryTotalDividends;
-                totalJCP += categoryTotalJCP;
-            }
+                assetCard.appendChild(assetDetails);
+            });
             
-            // Adicionar resumo geral
-            const totalIncome = totalDividends + totalJCP;
-            const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100).toFixed(2) : 0;
+            // Adicionar resumo da categoria
+            const categoryTotalIncome = categoryTotalDividends + categoryTotalJCP;
+            const categoryYieldPercentage = categoryTotalInvested > 0 ? 
+                (categoryTotalIncome / categoryTotalInvested * 100).toFixed(2) : 0;
             
-            const generalSummary = document.createElement('div');
-            generalSummary.className = 'report-summary';
-            generalSummary.innerHTML = `
-                <div class="report-summary-header">
-                    Resumo Geral
+            const categorySummary = document.createElement('div');
+            categorySummary.className = 'report-asset';
+            categorySummary.innerHTML = `
+                <div class="report-asset-header ${assetTypeClasses[type]}" style="font-weight: bold;">
+                    Resumo ${type}
                 </div>
-                <div class="report-summary-details">
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Total Investido</div>
-                        <div class="report-summary-value">${formatCurrency(totalInvested)}</div>
+                <div class="report-asset-details">
+                    <div class="report-asset-row">
+                        <span class="report-asset-label">Total Investido</span>
+                        <span class="report-asset-value">${formatCurrency(categoryTotalInvested)}</span>
                     </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Total Dividendos</div>
-                        <div class="report-summary-value">${formatCurrency(totalDividends)}</div>
+                    <div class="report-asset-row">
+                        <span class="report-asset-label">Total Dividendos</span>
+                        <span class="report-asset-value">${formatCurrency(categoryTotalDividends)}</span>
                     </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Total JCP</div>
-                        <div class="report-summary-value">${formatCurrency(totalJCP)}</div>
+                    <div class="report-asset-row">
+                        <span class="report-asset-label">Total JCP</span>
+                        <span class="report-asset-value">${formatCurrency(categoryTotalJCP)}</span>
                     </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Rendimento Total</div>
-                        <div class="report-summary-value">${formatCurrency(totalIncome)} (${totalYield}%)</div>
+                    <div class="report-asset-row">
+                        <span class="report-asset-label">Rendimento Total</span>
+                        <span class="report-asset-value">${formatCurrency(categoryTotalIncome)} (${categoryYieldPercentage}%)</span>
                     </div>
                 </div>
             `;
-            reportWrapper.appendChild(generalSummary);
-        }
-        
-        // Atualizar dropdowns de ativos
-        function updateAssetDropdowns() {
-            const transactionAssetSelect = document.getElementById('transactionAsset');
-            const dividendAssetSelect = document.getElementById('dividendAsset');
+            assetsContainer.appendChild(categorySummary);
             
-            // Limpar opções existentes
-            transactionAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
-            dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
-            
-            // Ordenar ativos por tipo e nome
-            const sortedAssets = sortAssets(db.assets);
-            
-            // Adicionar opções agrupadas por tipo
-            let currentType = null;
-            
-            sortedAssets.forEach(asset => {
-                if (asset.type !== currentType) {
-                    currentType = asset.type;
-                    const group = document.createElement('optgroup');
-                    group.label = currentType;
-                    
-                    const transactionGroup = group.cloneNode(true);
-                    const dividendGroup = group.cloneNode(true);
-                    
-                    transactionAssetSelect.appendChild(transactionGroup);
-                    dividendAssetSelect.appendChild(dividendGroup);
-                }
-                
-                const option = document.createElement('option');
-                option.value = asset.id;
-                option.textContent = `${asset.name} (${asset.code})`;
-                
-                // Encontrar o último optgroup adicionado
-                const transactionGroups = transactionAssetSelect.getElementsByTagName('optgroup');
-                const dividendGroups = dividendAssetSelect.getElementsByTagName('optgroup');
-                
-                transactionGroups[transactionGroups.length - 1].appendChild(option.cloneNode(true));
-                dividendGroups[dividendGroups.length - 1].appendChild(option);
-            });
-        }
-        
-        // Modal de ativo
-        function openAssetModal(assetId = null) {
-            const modal = document.getElementById('assetModal');
-            const form = document.getElementById('assetForm');
-            const title = document.getElementById('assetModalTitle');
-            
-            form.reset();
-            
-            if (assetId) {
-                title.textContent = 'Editar Ativo';
-                const asset = db.assets.find(a => a.id === assetId);
-                if (asset) {
-                    document.getElementById('assetId').value = asset.id;
-                    document.getElementById('assetType').value = asset.type;
-                    document.getElementById('assetName').value = asset.name;
-                    document.getElementById('assetCode').value = asset.code;
-                    document.getElementById('assetCnpj').value = asset.cnpj || '';
-                }
-            } else {
-                title.textContent = 'Adicionar Ativo';
-                document.getElementById('assetId').value = '';
-            }
-            
-            modal.style.display = 'flex';
-        }
-        
-        function saveAsset() {
-            const form = document.getElementById('assetForm');
-            const assetId = document.getElementById('assetId').value;
-            const type = document.getElementById('assetType').value;
-            const name = document.getElementById('assetName').value.trim();
-            const code = document.getElementById('assetCode').value.trim();
-            const cnpj = document.getElementById('assetCnpj').value.trim();
-            
-            if (!type || !name || !code) {
-                showNotification('Preencha todos os campos obrigatórios', true);
-                return;
-            }
-            
-            // CNPJ só é obrigatório para alguns tipos de ativos
-            if ((type === 'Ação' || type === 'FII' || type === 'BDR') && !cnpj) {
-                showNotification('CNPJ é obrigatório para este tipo de ativo', true);
-                return;
-            }
-            
-            const assetData = {
-                id: assetId ? parseInt(assetId) : db.nextId++,
-                type,
-                name,
-                code,
-                cnpj: cnpj || null
-            };
-            
-            if (assetId) {
-                // Editar ativo existente
-                const index = db.assets.findIndex(a => a.id === parseInt(assetId));
-                if (index !== -1) {
-                    db.assets[index] = assetData;
-                    showNotification('Ativo atualizado com sucesso!');
-                }
-            } else {
-                // Adicionar novo ativo
-                db.assets.push(assetData);
-                showNotification('Ativo adicionado com sucesso!');
-            }
-            
-            document.getElementById('assetModal').style.display = 'none';
-            renderAssets();
-            updateAssetDropdowns();
-            renderFullReport();
-        }
-        
-        function editAsset(id) {
-            openAssetModal(id);
-        }
-        
-        function deleteAsset(id) {
-            if (!confirm('Tem certeza que deseja excluir este ativo?')) return;
-            
-            // Verificar se há transações ou rendimentos associados
-            const hasTransactions = db.transactions.some(t => t.assetId === id);
-            const hasDividends = db.dividends.some(d => d.assetId === id);
-            
-            if (hasTransactions || hasDividends) {
-                showNotification('Não é possível excluir ativo com transações ou rendimentos associados', true);
-                return;
-            }
-            
-            db.assets = db.assets.filter(a => a.id !== id);
-            showNotification('Ativo excluído com sucesso!');
-            renderAssets();
-            updateAssetDropdowns();
-            renderFullReport();
-        }
-        
-        // Modal de transação
-        function openTransactionModal() {
-            const modal = document.getElementById('transactionModal');
-            const form = document.getElementById('transactionForm');
-            
-            form.reset();
-            document.getElementById('transactionDate').valueAsDate = new Date();
-            
-            modal.style.display = 'flex';
-        }
-        
-        function saveTransaction() {
-            const form = document.getElementById('transactionForm');
-            const date = document.getElementById('transactionDate').value;
-            const assetId = document.getElementById('transactionAsset').value;
-            const quantity = parseNumber(document.getElementById('transactionQuantity').value);
-            const price = parseNumber(document.getElementById('transactionPrice').value);
-            
-            if (!date || !assetId || isNaN(quantity) || isNaN(price)) {
-                showNotification('Preencha todos os campos obrigatórios', true);
-                return;
-            }
-            
-            if (quantity <= 0 || price <= 0) {
-                showNotification('Quantidade e valor devem ser maiores que zero', true);
-                return;
-            }
-            
-            const transaction = {
-                id: db.nextId++,
-                date,
-                assetId: parseInt(assetId),
-                quantity,
-                price
-            };
-            
-            db.transactions.push(transaction);
-            showNotification('Transação adicionada com sucesso!');
-            document.getElementById('transactionModal').style.display = 'none';
-            renderTransactions();
-            renderAssets();
-            renderFullReport();
-        }
-        
-        function deleteTransaction(id) {
-            if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
-            
-            db.transactions = db.transactions.filter(t => t.id !== id);
-            showNotification('Transação excluída com sucesso!');
-            renderTransactions();
-            renderAssets();
-            renderFullReport();
-        }
-        
-        // Modal de rendimento
-        function openDividendModal() {
-            const modal = document.getElementById('dividendModal');
-            const form = document.getElementById('dividendForm');
-            
-            form.reset();
-            document.getElementById('dividendDate').valueAsDate = new Date();
-            
-            modal.style.display = 'flex';
-        }
-        
-        function saveDividend() {
-            const form = document.getElementById('dividendForm');
-            const date = document.getElementById('dividendDate').value;
-            const assetId = document.getElementById('dividendAsset').value;
-            const dividendValue = parseNumber(document.getElementById('dividendValue').value);
-            const jcpValue = parseNumber(document.getElementById('jcpValue').value);
-            
-            if (!date || !assetId || isNaN(dividendValue) || isNaN(jcpValue)) {
-                showNotification('Preencha todos os campos obrigatórios', true);
-                return;
-            }
-            
-            if (dividendValue < 0 || jcpValue < 0) {
-                showNotification('Valores não podem ser negativos', true);
-                return;
-            }
-            
-            const dividend = {
-                id: db.nextId++,
-                date,
-                assetId: parseInt(assetId),
-                dividendValue,
-                jcpValue
-            };
-            
-            db.dividends.push(dividend);
-            showNotification('Rendimento adicionado com sucesso!');
-            document.getElementById('dividendModal').style.display = 'none';
-            renderDividends();
-            renderFullReport();
-        }
-        
-        function deleteDividend(id) {
-            if (!confirm('Tem certeza que deseja excluir este rendimento?')) return;
-            
-            db.dividends = db.dividends.filter(d => d.id !== id);
-            showNotification('Rendimento excluído com sucesso!');
-            renderDividends();
-            renderFullReport();
-        }
-        
-        // Função para imprimir relatório
-        function printReport() {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Relatório de Ativos</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 10px; font-size: 12px; }
-                        .report-container { display: flex; flex-direction: column; width: 100%; }
-                        .report-categories { display: flex; gap: 10px; margin-bottom: 15px; }
-                        .report-category { flex: 1; min-width: 200px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
-                        .report-category-header { padding: 8px; color: white; font-weight: bold; text-align: center; font-size: 13px; }
-                        .report-assets { padding: 8px; }
-                        .report-asset { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
-                        .report-asset-header { padding: 6px 8px; color: white; font-weight: 500; font-size: 12px; }
-                        .report-asset-details { padding: 8px; background-color: white; }
-                        .report-asset-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
-                        .report-asset-label { color: #666; }
-                        .report-asset-value { font-weight: 500; }
-                        .report-summary { margin-top: 15px; border: 2px solid #0d47a1; border-radius: 6px; overflow: hidden; }
-                        .report-summary-header { background-color: #0d47a1; color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 13px; }
-                        .report-summary-details { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; background-color: white; }
-                        .report-summary-item { flex: 1; min-width: 120px; }
-                        .report-summary-label { font-size: 11px; color: #666; margin-bottom: 4px; }
-                        .report-summary-value { font-weight: bold; font-size: 12px; }
-                        .asset-color-acao { background-color: #4285F4; }
-                        .asset-color-fii { background-color: #EA4335; }
-                        .asset-color-bdr { background-color: #FBBC05; }
-                        .asset-color-cdb { background-color: #34A853; }
-                        .asset-color-tesouro { background-color: #673AB7; }
-                        .asset-color-crypto { background-color: #FF5722; }
-                        @media print {
-                            body { transform: scale(0.8); transform-origin: 0 0; width: 125%; }
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1 style="font-size: 16px; text-align: center; margin-bottom: 10px;">Relatório Completo de Ativos</h1>
-                    <p style="text-align: center; font-size: 12px; margin-bottom: 15px;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
-                    ${document.getElementById('fullReport').innerHTML}
-                    <div style="text-align: center; margin-top: 20px;" class="no-print">
-                        <button onclick="window.print()" style="padding: 6px 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Imprimir
-                        </button>
-                        <button onclick="window.close()" style="padding: 6px 12px; background-color: #d93025; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
-                            Fechar
-                        </button>
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-        
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            setupTabs();
-            renderAssets();
-            renderTransactions();
-            renderDividends();
-            updateAssetDropdowns();
-            renderFullReport();
-            
-            // Botões de abertura de modal
-            document.getElementById('addAssetBtn').addEventListener('click', () => openAssetModal());
-            document.getElementById('addTransactionBtn').addEventListener('click', openTransactionModal);
-            document.getElementById('addDividendBtn').addEventListener('click', openDividendModal);
-            
-            // Botão de imprimir relatório
-            document.getElementById('printReportBtn').addEventListener('click', printReport);
-            
-            // Botões de salvar
-            document.getElementById('saveAssetBtn').addEventListener('click', saveAsset);
-            document.getElementById('saveTransactionBtn').addEventListener('click', saveTransaction);
-            document.getElementById('saveDividendBtn').addEventListener('click', saveDividend);
-            
-            // Botões de cancelar
-            document.getElementById('cancelAssetBtn').addEventListener('click', () => {
-                document.getElementById('assetModal').style.display = 'none';
-            });
-            
-            document.getElementById('cancelTransactionBtn').addEventListener('click', () => {
-                document.getElementById('transactionModal').style.display = 'none';
-            });
-            
-            document.getElementById('cancelDividendBtn').addEventListener('click', () => {
-                document.getElementById('dividendModal').style.display = 'none';
-            });
-            
-            // Botões de fechar modal
-            document.getElementById('closeAssetModal').addEventListener('click', () => {
-                document.getElementById('assetModal').style.display = 'none';
-            });
-            
-            document.getElementById('closeTransactionModal').addEventListener('click', () => {
-                document.getElementById('transactionModal').style.display = 'none';
-            });
-            
-            document.getElementById('closeDividendModal').addEventListener('click', () => {
-                document.getElementById('dividendModal').style.display = 'none';
-            });
+            // Atualizar totais gerais
+            totalInvested += categoryTotalInvested;
+            totalDividends += categoryTotalDividends;
+            totalJCP += categoryTotalJCP;
         });
-    </script>
+        
+        // Criar aba de resumo geral
+        const summaryTabContent = document.createElement('div');
+        summaryTabContent.className = 'report-tab-content active';
+        summaryTabContent.id = 'report-tab-summary';
+        reportContainer.appendChild(summaryTabContent);
+        
+        // Adicionar resumo geral
+        const totalIncome = totalDividends + totalJCP;
+        const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100).toFixed(2) : 0;
+        
+        const generalSummary = document.createElement('div');
+        generalSummary.className = 'report-summary';
+        generalSummary.innerHTML = `
+            <div class="report-summary-header">
+                Resumo Geral
+            </div>
+            <div class="report-summary-details">
+                <div class="report-summary-item">
+                    <div class="report-summary-label">Total Investido</div>
+                    <div class="report-summary-value">${formatCurrency(totalInvested)}</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="report-summary-label">Total Dividendos</div>
+                    <div class="report-summary-value">${formatCurrency(totalDividends)}</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="report-summary-label">Total JCP</div>
+                    <div class="report-summary-value">${formatCurrency(totalJCP)}</div>
+                </div>
+                <div class="report-summary-item">
+                    <div class="report-summary-label">Rendimento Total</div>
+                    <div class="report-summary-value">${formatCurrency(totalIncome)} (${totalYield}%)</div>
+                </div>
+            </div>
+        `;
+        summaryTabContent.appendChild(generalSummary);
+        
+        // Ativar a primeira aba se nenhuma estiver ativa
+        if (!document.querySelector('.report-tab.active')) {
+            const firstTab = document.querySelector('.report-tab');
+            if (firstTab) {
+                firstTab.classList.add('active');
+                const firstTabContent = document.getElementById(`report-tab-${firstTab.dataset.tab}`);
+                if (firstTabContent) {
+                    firstTabContent.classList.add('active');
+                }
+            }
+        }
+    }
+    
+    // Atualizar dropdowns de ativos
+    function updateAssetDropdowns() {
+        const transactionAssetSelect = document.getElementById('transactionAsset');
+        const dividendAssetSelect = document.getElementById('dividendAsset');
+        
+        // Limpar opções existentes
+        transactionAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
+        dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
+        
+        // Ordenar ativos por tipo e nome
+        const sortedAssets = sortAssets(db.assets);
+        
+        // Adicionar opções agrupadas por tipo
+        let currentType = null;
+        
+        sortedAssets.forEach(asset => {
+            if (asset.type !== currentType) {
+                currentType = asset.type;
+                const group = document.createElement('optgroup');
+                group.label = currentType;
+                
+                const transactionGroup = group.cloneNode(true);
+                const dividendGroup = group.cloneNode(true);
+                
+                transactionAssetSelect.appendChild(transactionGroup);
+                dividendAssetSelect.appendChild(dividendGroup);
+            }
+            
+            const option = document.createElement('option');
+            option.value = asset.id;
+            option.textContent = `${asset.name} (${asset.code})`;
+            
+            // Encontrar o último optgroup adicionado
+            const transactionGroups = transactionAssetSelect.getElementsByTagName('optgroup');
+            const dividendGroups = dividendAssetSelect.getElementsByTagName('optgroup');
+            
+            transactionGroups[transactionGroups.length - 1].appendChild(option.cloneNode(true));
+            dividendGroups[dividendGroups.length - 1].appendChild(option);
+        });
+    }
+    
+    // Modal de ativo
+    function openAssetModal(assetId = null) {
+        const modal = document.getElementById('assetModal');
+        const form = document.getElementById('assetForm');
+        const title = document.getElementById('assetModalTitle');
+        
+        form.reset();
+        
+        if (assetId) {
+            title.textContent = 'Editar Ativo';
+            const asset = db.assets.find(a => a.id === assetId);
+            if (asset) {
+                document.getElementById('assetId').value = asset.id;
+                document.getElementById('assetType').value = asset.type;
+                document.getElementById('assetName').value = asset.name;
+                document.getElementById('assetCode').value = asset.code;
+                document.getElementById('assetCnpj').value = asset.cnpj || '';
+            }
+        } else {
+            title.textContent = 'Adicionar Ativo';
+            document.getElementById('assetId').value = '';
+        }
+        
+        modal.style.display = 'flex';
+    }
+    
+    function saveAsset() {
+        const form = document.getElementById('assetForm');
+        const assetId = document.getElementById('assetId').value;
+        const type = document.getElementById('assetType').value;
+        const name = document.getElementById('assetName').value.trim();
+        const code = document.getElementById('assetCode').value.trim();
+        const cnpj = document.getElementById('assetCnpj').value.trim();
+        
+        if (!type || !name || !code) {
+            showNotification('Preencha todos os campos obrigatórios', true);
+            return;
+        }
+        
+        // CNPJ só é obrigatório para alguns tipos de ativos
+        if ((type === 'Ação' || type === 'FII' || type === 'BDR') && !cnpj) {
+            showNotification('CNPJ é obrigatório para este tipo de ativo', true);
+            return;
+        }
+        
+        const assetData = {
+            id: assetId ? parseInt(assetId) : db.nextId++,
+            type,
+            name,
+            code,
+            cnpj: cnpj || null
+        };
+        
+        if (assetId) {
+            // Editar ativo existente
+            const index = db.assets.findIndex(a => a.id === parseInt(assetId));
+            if (index !== -1) {
+                db.assets[index] = assetData;
+                showNotification('Ativo atualizado com sucesso!');
+            }
+        } else {
+            // Adicionar novo ativo
+            db.assets.push(assetData);
+            showNotification('Ativo adicionado com sucesso!');
+        }
+        
+        document.getElementById('assetModal').style.display = 'none';
+        renderAssets();
+        updateAssetDropdowns();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    function editAsset(id) {
+        openAssetModal(id);
+    }
+    
+    function deleteAsset(id) {
+        if (!confirm('Tem certeza que deseja excluir este ativo?')) return;
+        
+        // Verificar se há transações ou rendimentos associados
+        const hasTransactions = db.transactions.some(t => t.assetId === id);
+        const hasDividends = db.dividends.some(d => d.assetId === id);
+        
+        if (hasTransactions || hasDividends) {
+            showNotification('Não é possível excluir ativo com transações ou rendimentos associados', true);
+            return;
+        }
+        
+        db.assets = db.assets.filter(a => a.id !== id);
+        showNotification('Ativo excluído com sucesso!');
+        renderAssets();
+        updateAssetDropdowns();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    // Modal de transação
+    function openTransactionModal() {
+        const modal = document.getElementById('transactionModal');
+        const form = document.getElementById('transactionForm');
+        
+        form.reset();
+        document.getElementById('transactionDate').valueAsDate = new Date();
+        
+        modal.style.display = 'flex';
+    }
+    
+    function saveTransaction() {
+        const form = document.getElementById('transactionForm');
+        const date = document.getElementById('transactionDate').value;
+        const assetId = document.getElementById('transactionAsset').value;
+        const quantity = parseNumber(document.getElementById('transactionQuantity').value);
+        const price = parseNumber(document.getElementById('transactionPrice').value);
+        
+        if (!date || !assetId || isNaN(quantity) || isNaN(price)) {
+            showNotification('Preencha todos os campos obrigatórios', true);
+            return;
+        }
+        
+        if (quantity <= 0 || price <= 0) {
+            showNotification('Quantidade e valor devem ser maiores que zero', true);
+            return;
+        }
+        
+        const transaction = {
+            id: db.nextId++,
+            date,
+            assetId: parseInt(assetId),
+            quantity,
+            price
+        };
+        
+        db.transactions.push(transaction);
+        showNotification('Transação adicionada com sucesso!');
+        document.getElementById('transactionModal').style.display = 'none';
+        renderTransactions();
+        renderAssets();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    function deleteTransaction(id) {
+        if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+        
+        db.transactions = db.transactions.filter(t => t.id !== id);
+        showNotification('Transação excluída com sucesso!');
+        renderTransactions();
+        renderAssets();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    // Modal de rendimento
+    function openDividendModal() {
+        const modal = document.getElementById('dividendModal');
+        const form = document.getElementById('dividendForm');
+        
+        form.reset();
+        document.getElementById('dividendDate').valueAsDate = new Date();
+        
+        modal.style.display = 'flex';
+    }
+    
+    function saveDividend() {
+        const form = document.getElementById('dividendForm');
+        const date = document.getElementById('dividendDate').value;
+        const assetId = document.getElementById('dividendAsset').value;
+        const dividendValue = parseNumber(document.getElementById('dividendValue').value);
+        const jcpValue = parseNumber(document.getElementById('jcpValue').value);
+        
+        if (!date || !assetId || isNaN(dividendValue) || isNaN(jcpValue)) {
+            showNotification('Preencha todos os campos obrigatórios', true);
+            return;
+        }
+        
+        if (dividendValue < 0 || jcpValue < 0) {
+            showNotification('Valores não podem ser negativos', true);
+            return;
+        }
+        
+        const dividend = {
+            id: db.nextId++,
+            date,
+            assetId: parseInt(assetId),
+            dividendValue,
+            jcpValue
+        };
+        
+        db.dividends.push(dividend);
+        showNotification('Rendimento adicionado com sucesso!');
+        document.getElementById('dividendModal').style.display = 'none';
+        renderDividends();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    function deleteDividend(id) {
+        if (!confirm('Tem certeza que deseja excluir este rendimento?')) return;
+        
+        db.dividends = db.dividends.filter(d => d.id !== id);
+        showNotification('Rendimento excluído com sucesso!');
+        renderDividends();
+        renderFullReport();
+        saveToLocalStorage();
+    }
+    
+    // Função para imprimir relatório
+    function printReport() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Relatório de Ativos</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 10px; font-size: 12px; }
+                    .report-container { display: flex; flex-direction: column; width: 100%; }
+                    .report-categories { display: flex; gap: 10px; margin-bottom: 15px; flex-direction: column; }
+                    .report-category { flex: 1; min-width: 100%; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; margin-bottom: 15px; }
+                    .report-category-header { padding: 8px; color: white; font-weight: bold; text-align: center; font-size: 13px; }
+                    .report-assets { padding: 8px; }
+                    .report-asset { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+                    .report-asset-header { padding: 6px 8px; color: white; font-weight: 500; font-size: 12px; }
+                    .report-asset-details { padding: 8px; background-color: white; }
+                    .report-asset-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
+                    .report-asset-label { color: #666; }
+                    .report-asset-value { font-weight: 500; }
+                    .report-summary { margin-top: 15px; border: 2px solid #0d47a1; border-radius: 6px; overflow: hidden; }
+                    .report-summary-header { background-color: #0d47a1; color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 13px; }
+                    .report-summary-details { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; background-color: white; }
+                    .report-summary-item { flex: 1; min-width: 120px; }
+                    .report-summary-label { font-size: 11px; color: #666; margin-bottom: 4px; }
+                    .report-summary-value { font-weight: bold; font-size: 12px; }
+                    .asset-color-acao { background-color: #4285F4; }
+                    .asset-color-fii { background-color: #EA4335; }
+                    .asset-color-bdr { background-color: #FBBC05; }
+                    .asset-color-cdb { background-color: #34A853; }
+                    .asset-color-tesouro { background-color: #673AB7; }
+                    .asset-color-crypto { background-color: #FF5722; }
+                    .report-tabs { display: none; }
+                    .report-tab-content { display: block !important; }
+                    @page { size: auto; margin: 5mm; }
+                    @media print {
+                        body { transform: scale(1); transform-origin: 0 0; width: 100%; }
+                        .no-print { display: none; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1 style="font-size: 16px; text-align: center; margin-bottom: 10px;">Relatório Completo de Ativos</h1>
+                <p style="text-align: center; font-size: 12px; margin-bottom: 15px;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
+                ${document.getElementById('fullReport').innerHTML.replace(/report-tab-content/g, 'report-tab-content-print')}
+                <div style="text-align: center; margin-top: 20px;" class="no-print">
+                    <button onclick="window.print()" style="padding: 6px 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Imprimir
+                    </button>
+                    <button onclick="window.close()" style="padding: 6px 12px; background-color: #d93025; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                        Fechar
+                    </button>
+                </div>
+                <script>
+                    // Expandir todos os itens para impressão
+                    document.querySelectorAll('.report-asset-header').forEach(header => {
+                        header.classList.remove('collapsed');
+                        const details = header.nextElementSibling;
+                        details.classList.remove('collapsed');
+                    });
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Carregar dados do localStorage
+        loadFromLocalStorage();
+        
+        setupTabs();
+        renderAssets();
+        renderTransactions();
+        renderDividends();
+        updateAssetDropdowns();
+        renderFullReport();
+        
+        // Botões de abertura de modal
+        document.getElementById('addAssetBtn').addEventListener('click', () => openAssetModal());
+        document.getElementById('addTransactionBtn').addEventListener('click', openTransactionModal);
+        document.getElementById('addDividendBtn').addEventListener('click', openDividendModal);
+        
+        // Botão de imprimir relatório
+        document.getElementById('printReportBtn').addEventListener('click', printReport);
+        
+        // Botões de salvar
+        document.getElementById('saveAssetBtn').addEventListener('click', saveAsset);
+        document.getElementById('saveTransactionBtn').addEventListener('click', saveTransaction);
+        document.getElementById('saveDividendBtn').addEventListener('click', saveDividend);
+        
+        // Botões de cancelar
+        document.getElementById('cancelAssetBtn').addEventListener('click', () => {
+            document.getElementById('assetModal').style.display = 'none';
+        });
+        
+        document.getElementById('cancelTransactionBtn').addEventListener('click', () => {
+            document.getElementById('transactionModal').style.display = 'none';
+        });
+        
+        document.getElementById('cancelDividendBtn').addEventListener('click', () => {
+            document.getElementById('dividendModal').style.display = 'none';
+        });
+        
+        // Botões de fechar modal
+        document.getElementById('closeAssetModal').addEventListener('click', () => {
+            document.getElementById('assetModal').style.display = 'none';
+        });
+        
+        document.getElementById('closeTransactionModal').addEventListener('click', () => {
+            document.getElementById('transactionModal').style.display = 'none';
+        });
+        
+        document.getElementById('closeDividendModal').addEventListener('click', () => {
+            document.getElementById('dividendModal').style.display = 'none';
+        });
+        
+        // Fechar menu mobile ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mobile-menu-btn') && !e.target.closest('.mobile-tabs')) {
+                document.getElementById('mobileTabs').classList.remove('show');
+            }
+        });
+    });
+</script>
 </body>
-</html>
+</html> 
