@@ -665,6 +665,33 @@
             });
         }
         
+        // Função para ordenar ativos por nome (ordem crescente)
+        function sortAssetsByName(assets) {
+            return [...assets].sort((a, b) => a.name.localeCompare(b.name));
+        }
+        
+        // Função para ordenar transações por nome do ativo (ordem crescente)
+        function sortTransactionsByAssetName(transactions) {
+            return [...transactions].sort((a, b) => {
+                const assetA = db.assets.find(asset => asset.id === a.assetId);
+                const assetB = db.assets.find(asset => asset.id === b.assetId);
+                const nameA = assetA ? assetA.name : '';
+                const nameB = assetB ? assetB.name : '';
+                return nameA.localeCompare(nameB);
+            });
+        }
+        
+        // Função para ordenar rendimentos por nome do ativo (ordem crescente)
+        function sortDividendsByAssetName(dividends) {
+            return [...dividends].sort((a, b) => {
+                const assetA = db.assets.find(asset => asset.id === a.assetId);
+                const assetB = db.assets.find(asset => asset.id === b.assetId);
+                const nameA = assetA ? assetA.name : '';
+                const nameB = assetB ? assetB.name : '';
+                return nameA.localeCompare(nameB);
+            });
+        }
+        
         // Renderizar tabela de ativos
         function renderAssets() {
             const tbody = document.getElementById('assetTable');
@@ -675,7 +702,10 @@
                 return;
             }
             
-            db.assets.forEach(asset => {
+            // Ordenar ativos por nome (ordem crescente)
+            const sortedAssets = sortAssetsByName(db.assets);
+            
+            sortedAssets.forEach(asset => {
                 const assetData = calculateAssetData(asset.id);
                 
                 const row = document.createElement('tr');
@@ -729,7 +759,10 @@
                 return;
             }
             
-            db.transactions.forEach(transaction => {
+            // Ordenar transações por nome do ativo (ordem crescente)
+            const sortedTransactions = sortTransactionsByAssetName(db.transactions);
+            
+            sortedTransactions.forEach(transaction => {
                 const asset = db.assets.find(a => a.id === transaction.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
                 
@@ -760,7 +793,10 @@
                 return;
             }
             
-            db.dividends.forEach(dividend => {
+            // Ordenar rendimentos por nome do ativo (ordem crescente)
+            const sortedDividends = sortDividendsByAssetName(db.dividends);
+            
+            sortedDividends.forEach(dividend => {
                 const asset = db.assets.find(a => a.id === dividend.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
                 const total = dividend.dividendValue + dividend.jcpValue;
@@ -792,8 +828,8 @@
                 return;
             }
             
-            // Ordenar ativos por nome
-            const sortedAssets = [...db.assets].sort((a, b) => a.name.localeCompare(b.name));
+            // Ordenar ativos por nome (ordem crescente)
+            const sortedAssets = sortAssetsByName(db.assets);
             
             sortedAssets.forEach(asset => {
                 const assetSection = document.createElement('div');
@@ -801,8 +837,14 @@
                 
                 // Calcular dados do ativo
                 const assetData = calculateAssetData(asset.id);
-                const assetTransactions = db.transactions.filter(t => t.assetId === asset.id);
-                const assetDividends = db.dividends.filter(d => d.assetId === asset.id);
+                const assetTransactions = db.transactions
+                    .filter(t => t.assetId === asset.id)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar transações por data
+                
+                const assetDividends = db.dividends
+                    .filter(d => d.assetId === asset.id)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar rendimentos por data
+                
                 const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
                 const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
                 const totalIncome = totalDividends + totalJCP;
@@ -943,8 +985,11 @@
             transactionAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             
+            // Ordenar ativos por nome (ordem crescente)
+            const sortedAssets = sortAssetsByName(db.assets);
+            
             // Adicionar opções
-            db.assets.forEach(asset => {
+            sortedAssets.forEach(asset => {
                 const option = document.createElement('option');
                 option.value = asset.id;
                 option.textContent = `${asset.name} (${asset.code})`;
