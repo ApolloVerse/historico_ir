@@ -132,6 +132,11 @@
             background-color: var(--warning);
         }
         
+        .button.secondary {
+            background-color: var(--gray-light);
+            color: var(--text);
+        }
+        
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
@@ -347,6 +352,15 @@
             color: var(--danger);
         }
         
+        .category-header {
+            background-color: #e8f0fe;
+            padding: 10px 15px;
+            margin: 20px 0 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -393,6 +407,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Código</th>
                                 <th>CNPJ</th>
@@ -423,6 +438,7 @@
                         <thead>
                             <tr>
                                 <th>Data da Compra</th>
+                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Quantidade</th>
                                 <th>Valor Unitário</th>
@@ -451,6 +467,7 @@
                         <thead>
                             <tr>
                                 <th>Data Pagamento</th>
+                                <th>Tipo</th>
                                 <th>Ativo</th>
                                 <th>Dividendos (R$)</th>
                                 <th>JCP (R$)</th>
@@ -493,17 +510,31 @@
                     <input type="hidden" id="assetId">
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="assetType">Tipo de Ativo</label>
+                            <select class="form-control" id="assetType" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="Ação">Ação</option>
+                                <option value="FII">Fundo Imobiliário (FII)</option>
+                                <option value="BDR">BDR</option>
+                                <option value="CDB">CDB</option>
+                                <option value="Tesouro Direto">Tesouro Direto</option>
+                                <option value="Crypto">Criptomoeda</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="assetName">Nome do Ativo</label>
                             <input type="text" class="form-control" id="assetName" placeholder="Ex: BANCO BRADESCO S.A" required>
                         </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="assetCode">Código</label>
                             <input type="text" class="form-control" id="assetCode" placeholder="Ex: BBDC4" required>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="assetCnpj">CNPJ</label>
-                        <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00" required>
+                        <div class="form-group">
+                            <label for="assetCnpj">CNPJ</label>
+                            <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -609,6 +640,16 @@
             nextId: 1
         };
         
+        // Tipos de ativos disponíveis
+        const assetTypes = [
+            "Ação", 
+            "FII", 
+            "BDR", 
+            "CDB", 
+            "Tesouro Direto", 
+            "Crypto"
+        ];
+        
         // Formatar moeda
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
@@ -665,29 +706,64 @@
             });
         }
         
-        // Função para ordenar ativos por nome (ordem crescente)
-        function sortAssetsByName(assets) {
-            return [...assets].sort((a, b) => a.name.localeCompare(b.name));
+        // Função para ordenar ativos por tipo e depois por nome
+        function sortAssets(assets) {
+            return [...assets].sort((a, b) => {
+                // Ordenar primeiro por tipo (usando a ordem definida em assetTypes)
+                const typeA = assetTypes.indexOf(a.type);
+                const typeB = assetTypes.indexOf(b.type);
+                
+                if (typeA !== typeB) {
+                    return typeA - typeB;
+                }
+                
+                // Se for o mesmo tipo, ordenar por nome
+                return a.name.localeCompare(b.name);
+            });
         }
         
-        // Função para ordenar transações por nome do ativo (ordem crescente)
-        function sortTransactionsByAssetName(transactions) {
+        // Função para ordenar transações por tipo de ativo e depois por nome do ativo
+        function sortTransactions(transactions) {
             return [...transactions].sort((a, b) => {
                 const assetA = db.assets.find(asset => asset.id === a.assetId);
                 const assetB = db.assets.find(asset => asset.id === b.assetId);
-                const nameA = assetA ? assetA.name : '';
-                const nameB = assetB ? assetB.name : '';
+                
+                if (!assetA || !assetB) return 0;
+                
+                // Ordenar primeiro por tipo
+                const typeA = assetTypes.indexOf(assetA.type);
+                const typeB = assetTypes.indexOf(assetB.type);
+                
+                if (typeA !== typeB) {
+                    return typeA - typeB;
+                }
+                
+                // Se for o mesmo tipo, ordenar por nome do ativo
+                const nameA = assetA.name;
+                const nameB = assetB.name;
                 return nameA.localeCompare(nameB);
             });
         }
         
-        // Função para ordenar rendimentos por nome do ativo (ordem crescente)
-        function sortDividendsByAssetName(dividends) {
+        // Função para ordenar rendimentos por tipo de ativo e depois por nome do ativo
+        function sortDividends(dividends) {
             return [...dividends].sort((a, b) => {
                 const assetA = db.assets.find(asset => asset.id === a.assetId);
                 const assetB = db.assets.find(asset => asset.id === b.assetId);
-                const nameA = assetA ? assetA.name : '';
-                const nameB = assetB ? assetB.name : '';
+                
+                if (!assetA || !assetB) return 0;
+                
+                // Ordenar primeiro por tipo
+                const typeA = assetTypes.indexOf(assetA.type);
+                const typeB = assetTypes.indexOf(assetB.type);
+                
+                if (typeA !== typeB) {
+                    return typeA - typeB;
+                }
+                
+                // Se for o mesmo tipo, ordenar por nome do ativo
+                const nameA = assetA.name;
+                const nameB = assetB.name;
                 return nameA.localeCompare(nameB);
             });
         }
@@ -698,21 +774,35 @@
             tbody.innerHTML = '';
             
             if (db.assets.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum ativo cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum ativo cadastrado</td></tr>';
                 return;
             }
             
-            // Ordenar ativos por nome (ordem crescente)
-            const sortedAssets = sortAssetsByName(db.assets);
+            // Ordenar ativos por tipo e nome
+            const sortedAssets = sortAssets(db.assets);
+            
+            let currentType = null;
             
             sortedAssets.forEach(asset => {
                 const assetData = calculateAssetData(asset.id);
                 
+                // Adicionar cabeçalho de categoria se o tipo mudou
+                if (asset.type !== currentType) {
+                    currentType = asset.type;
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'category-row';
+                    headerRow.innerHTML = `
+                        <td colspan="8" class="category-header">${currentType}</td>
+                    `;
+                    tbody.appendChild(headerRow);
+                }
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td>${asset.type}</td>
                     <td>${asset.name}</td>
                     <td>${asset.code}</td>
-                    <td>${asset.cnpj}</td>
+                    <td>${asset.cnpj || '-'}</td>
                     <td>${assetData.quantity}</td>
                     <td>${formatCurrency(assetData.avgPrice)}</td>
                     <td>${formatCurrency(assetData.totalInvested)}</td>
@@ -755,20 +845,35 @@
             tbody.innerHTML = '';
             
             if (db.transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhuma transação cadastrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhuma transação cadastrada</td></tr>';
                 return;
             }
             
-            // Ordenar transações por nome do ativo (ordem crescente)
-            const sortedTransactions = sortTransactionsByAssetName(db.transactions);
+            // Ordenar transações por tipo e nome do ativo
+            const sortedTransactions = sortTransactions(db.transactions);
+            
+            let currentType = null;
             
             sortedTransactions.forEach(transaction => {
                 const asset = db.assets.find(a => a.id === transaction.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
+                const assetType = asset ? asset.type : 'Desconhecido';
+                
+                // Adicionar cabeçalho de categoria se o tipo mudou
+                if (assetType !== currentType) {
+                    currentType = assetType;
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'category-row';
+                    headerRow.innerHTML = `
+                        <td colspan="7" class="category-header">${currentType}</td>
+                    `;
+                    tbody.appendChild(headerRow);
+                }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${formatDate(transaction.date)}</td>
+                    <td>${assetType}</td>
                     <td>${assetName}</td>
                     <td>${transaction.quantity}</td>
                     <td>${formatCurrency(transaction.price)}</td>
@@ -789,21 +894,36 @@
             tbody.innerHTML = '';
             
             if (db.dividends.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum rendimento cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum rendimento cadastrado</td></tr>';
                 return;
             }
             
-            // Ordenar rendimentos por nome do ativo (ordem crescente)
-            const sortedDividends = sortDividendsByAssetName(db.dividends);
+            // Ordenar rendimentos por tipo e nome do ativo
+            const sortedDividends = sortDividends(db.dividends);
+            
+            let currentType = null;
             
             sortedDividends.forEach(dividend => {
                 const asset = db.assets.find(a => a.id === dividend.assetId);
                 const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
+                const assetType = asset ? asset.type : 'Desconhecido';
                 const total = dividend.dividendValue + dividend.jcpValue;
+                
+                // Adicionar cabeçalho de categoria se o tipo mudou
+                if (assetType !== currentType) {
+                    currentType = assetType;
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'category-row';
+                    headerRow.innerHTML = `
+                        <td colspan="7" class="category-header">${currentType}</td>
+                    `;
+                    tbody.appendChild(headerRow);
+                }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${formatDate(dividend.date)}</td>
+                    <td>${assetType}</td>
                     <td>${assetName}</td>
                     <td>${formatCurrency(dividend.dividendValue)}</td>
                     <td>${formatCurrency(dividend.jcpValue)}</td>
@@ -818,7 +938,7 @@
             });
         }
         
-        // Renderizar relatório completo
+        // Renderizar relatório completo agrupado por tipo de ativo
         function renderFullReport() {
             const reportContainer = document.getElementById('fullReport');
             reportContainer.innerHTML = '';
@@ -828,53 +948,242 @@
                 return;
             }
             
-            // Ordenar ativos por nome (ordem crescente)
-            const sortedAssets = sortAssetsByName(db.assets);
+            // Agrupar ativos por tipo
+            const assetsByType = {};
+            assetTypes.forEach(type => {
+                assetsByType[type] = db.assets.filter(asset => asset.type === type);
+            });
             
-            sortedAssets.forEach(asset => {
-                const assetSection = document.createElement('div');
-                assetSection.className = 'asset-summary';
+            // Calcular totais por categoria
+            const categoryTotals = {};
+            
+            // Processar cada categoria
+            for (const [type, assets] of Object.entries(assetsByType)) {
+                if (assets.length === 0) continue;
                 
-                // Calcular dados do ativo
-                const assetData = calculateAssetData(asset.id);
-                const assetTransactions = db.transactions
-                    .filter(t => t.assetId === asset.id)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar transações por data
+                // Adicionar cabeçalho da categoria
+                const categoryHeader = document.createElement('h2');
+                categoryHeader.className = 'category-header';
+                categoryHeader.textContent = type;
+                reportContainer.appendChild(categoryHeader);
                 
-                const assetDividends = db.dividends
-                    .filter(d => d.assetId === asset.id)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordenar rendimentos por data
+                let categoryTotalInvested = 0;
+                let categoryTotalDividends = 0;
+                let categoryTotalJCP = 0;
                 
-                const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
-                const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
-                const totalIncome = totalDividends + totalJCP;
-                const yieldPercentage = assetData.totalInvested > 0 ? 
-                    (totalIncome / assetData.totalInvested * 100).toFixed(2) : 0;
+                // Processar cada ativo da categoria
+                const sortedAssets = sortAssets(assets);
                 
-                // Cabeçalho do ativo
-                const header = document.createElement('div');
-                header.className = 'asset-header';
-                header.innerHTML = `
-                    <div class="asset-name">${asset.name} (${asset.code})</div>
-                    <div>CNPJ: ${asset.cnpj}</div>
+                sortedAssets.forEach(asset => {
+                    const assetSection = document.createElement('div');
+                    assetSection.className = 'asset-summary';
+                    
+                    // Calcular dados do ativo
+                    const assetData = calculateAssetData(asset.id);
+                    const assetTransactions = db.transactions
+                        .filter(t => t.assetId === asset.id)
+                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    const assetDividends = db.dividends
+                        .filter(d => d.assetId === asset.id)
+                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    const totalDividends = assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
+                    const totalJCP = assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
+                    const totalIncome = totalDividends + totalJCP;
+                    const yieldPercentage = assetData.totalInvested > 0 ? 
+                        (totalIncome / assetData.totalInvested * 100).toFixed(2) : 0;
+                    
+                    // Atualizar totais da categoria
+                    categoryTotalInvested += assetData.totalInvested;
+                    categoryTotalDividends += totalDividends;
+                    categoryTotalJCP += totalJCP;
+                    
+                    // Cabeçalho do ativo
+                    const header = document.createElement('div');
+                    header.className = 'asset-header';
+                    header.innerHTML = `
+                        <div class="asset-name">${asset.name} (${asset.code})</div>
+                        <div>${asset.cnpj ? 'CNPJ: ' + asset.cnpj : ''}</div>
+                    `;
+                    assetSection.appendChild(header);
+                    
+                    // Detalhes resumidos
+                    const details = document.createElement('div');
+                    details.className = 'asset-details';
+                    details.innerHTML = `
+                        <div class="detail-item">
+                            <span class="detail-label">Quantidade Total</span>
+                            <span class="detail-value">${assetData.quantity}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Preço Médio</span>
+                            <span class="detail-value">${formatCurrency(assetData.avgPrice)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Investido</span>
+                            <span class="detail-value">${formatCurrency(assetData.totalInvested)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Dividendos</span>
+                            <span class="detail-value">${formatCurrency(totalDividends)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total JCP</span>
+                            <span class="detail-value">${formatCurrency(totalJCP)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Rendimento Total</span>
+                            <span class="detail-value">${formatCurrency(totalIncome)} (${yieldPercentage}%)</span>
+                        </div>
+                    `;
+                    assetSection.appendChild(details);
+                    
+                    // Seção de Transações
+                    if (assetTransactions.length > 0) {
+                        const transactionsSection = document.createElement('div');
+                        transactionsSection.className = 'summary-section';
+                        
+                        const sectionTitle = document.createElement('h3');
+                        sectionTitle.className = 'summary-section-title';
+                        sectionTitle.textContent = 'Transações';
+                        transactionsSection.appendChild(sectionTitle);
+                        
+                        const table = document.createElement('table');
+                        table.className = 'summary-table';
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Unitário</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${assetTransactions.map(t => `
+                                    <tr>
+                                        <td>${formatDate(t.date)}</td>
+                                        <td>${t.quantity}</td>
+                                        <td>${formatCurrency(t.price)}</td>
+                                        <td>${formatCurrency(t.quantity * t.price)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+                        transactionsSection.appendChild(table);
+                        assetSection.appendChild(transactionsSection);
+                    }
+                    
+                    // Seção de Rendimentos
+                    if (assetDividends.length > 0) {
+                        const dividendsSection = document.createElement('div');
+                        dividendsSection.className = 'summary-section';
+                        
+                        const sectionTitle = document.createElement('h3');
+                        sectionTitle.className = 'summary-section-title';
+                        sectionTitle.textContent = 'Rendimentos';
+                        dividendsSection.appendChild(sectionTitle);
+                        
+                        const table = document.createElement('table');
+                        table.className = 'summary-table';
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Dividendos</th>
+                                    <th>JCP</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${assetDividends.map(d => {
+                                    const total = d.dividendValue + d.jcpValue;
+                                    return `
+                                    <tr>
+                                        <td>${formatDate(d.date)}</td>
+                                        <td>${formatCurrency(d.dividendValue)}</td>
+                                        <td>${formatCurrency(d.jcpValue)}</td>
+                                        <td>${formatCurrency(total)}</td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                                <tr style="font-weight: bold;">
+                                    <td>Total</td>
+                                    <td>${formatCurrency(totalDividends)}</td>
+                                    <td>${formatCurrency(totalJCP)}</td>
+                                    <td>${formatCurrency(totalIncome)}</td>
+                                </tr>
+                            </tbody>
+                        `;
+                        dividendsSection.appendChild(table);
+                        assetSection.appendChild(dividendsSection);
+                    }
+                    
+                    reportContainer.appendChild(assetSection);
+                });
+                
+                // Adicionar resumo da categoria
+                const categoryTotalIncome = categoryTotalDividends + categoryTotalJCP;
+                const categoryYieldPercentage = categoryTotalInvested > 0 ? 
+                    (categoryTotalIncome / categoryTotalInvested * 100).toFixed(2) : 0;
+                
+                const categorySummary = document.createElement('div');
+                categorySummary.className = 'asset-summary';
+                categorySummary.innerHTML = `
+                    <div class="asset-header">
+                        <div class="asset-name">Resumo da Categoria: ${type}</div>
+                    </div>
+                    <div class="asset-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Total Investido</span>
+                            <span class="detail-value">${formatCurrency(categoryTotalInvested)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Dividendos</span>
+                            <span class="detail-value">${formatCurrency(categoryTotalDividends)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total JCP</span>
+                            <span class="detail-value">${formatCurrency(categoryTotalJCP)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Rendimento Total</span>
+                            <span class="detail-value">${formatCurrency(categoryTotalIncome)} (${categoryYieldPercentage}%)</span>
+                        </div>
+                    </div>
                 `;
-                assetSection.appendChild(header);
+                reportContainer.appendChild(categorySummary);
                 
-                // Detalhes resumidos
-                const details = document.createElement('div');
-                details.className = 'asset-details';
-                details.innerHTML = `
-                    <div class="detail-item">
-                        <span class="detail-label">Quantidade Total</span>
-                        <span class="detail-value">${assetData.quantity}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Preço Médio</span>
-                        <span class="detail-value">${formatCurrency(assetData.avgPrice)}</span>
-                    </div>
+                // Armazenar totais da categoria
+                categoryTotals[type] = {
+                    invested: categoryTotalInvested,
+                    dividends: categoryTotalDividends,
+                    jcp: categoryTotalJCP,
+                    income: categoryTotalIncome,
+                    yield: categoryYieldPercentage
+                };
+            }
+            
+            // Adicionar resumo geral
+            const totalInvested = Object.values(categoryTotals).reduce((sum, cat) => sum + cat.invested, 0);
+            const totalDividends = Object.values(categoryTotals).reduce((sum, cat) => sum + cat.dividends, 0);
+            const totalJCP = Object.values(categoryTotals).reduce((sum, cat) => sum + cat.jcp, 0);
+            const totalIncome = totalDividends + totalJCP;
+            const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100).toFixed(2) : 0;
+            
+            const generalSummary = document.createElement('div');
+            generalSummary.className = 'asset-summary';
+            generalSummary.style.backgroundColor = '#e8f0fe';
+            generalSummary.style.border = '2px solid var(--primary)';
+            generalSummary.innerHTML = `
+                <div class="asset-header" style="background-color: var(--primary-dark);">
+                    <div class="asset-name">Resumo Geral</div>
+                </div>
+                <div class="asset-details">
                     <div class="detail-item">
                         <span class="detail-label">Total Investido</span>
-                        <span class="detail-value">${formatCurrency(assetData.totalInvested)}</span>
+                        <span class="detail-value">${formatCurrency(totalInvested)}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Total Dividendos</span>
@@ -886,94 +1195,11 @@
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Rendimento Total</span>
-                        <span class="detail-value">${formatCurrency(totalIncome)} (${yieldPercentage}%)</span>
+                        <span class="detail-value">${formatCurrency(totalIncome)} (${totalYield}%)</span>
                     </div>
-                `;
-                assetSection.appendChild(details);
-                
-                // Seção de Transações
-                if (assetTransactions.length > 0) {
-                    const transactionsSection = document.createElement('div');
-                    transactionsSection.className = 'summary-section';
-                    
-                    const sectionTitle = document.createElement('h3');
-                    sectionTitle.className = 'summary-section-title';
-                    sectionTitle.textContent = 'Transações';
-                    transactionsSection.appendChild(sectionTitle);
-                    
-                    const table = document.createElement('table');
-                    table.className = 'summary-table';
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Quantidade</th>
-                                <th>Valor Unitário</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${assetTransactions.map(t => `
-                                <tr>
-                                    <td>${formatDate(t.date)}</td>
-                                    <td>${t.quantity}</td>
-                                    <td>${formatCurrency(t.price)}</td>
-                                    <td>${formatCurrency(t.quantity * t.price)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    `;
-                    transactionsSection.appendChild(table);
-                    assetSection.appendChild(transactionsSection);
-                }
-                
-                // Seção de Rendimentos
-                if (assetDividends.length > 0) {
-                    const dividendsSection = document.createElement('div');
-                    dividendsSection.className = 'summary-section';
-                    
-                    const sectionTitle = document.createElement('h3');
-                    sectionTitle.className = 'summary-section-title';
-                    sectionTitle.textContent = 'Rendimentos';
-                    dividendsSection.appendChild(sectionTitle);
-                    
-                    const table = document.createElement('table');
-                    table.className = 'summary-table';
-                    table.innerHTML = `
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Dividendos</th>
-                                <th>JCP</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${assetDividends.map(d => {
-                                const total = d.dividendValue + d.jcpValue;
-                                return `
-                                <tr>
-                                    <td>${formatDate(d.date)}</td>
-                                    <td>${formatCurrency(d.dividendValue)}</td>
-                                    <td>${formatCurrency(d.jcpValue)}</td>
-                                    <td>${formatCurrency(total)}</td>
-                                </tr>
-                                `;
-                            }).join('')}
-                            <tr style="font-weight: bold;">
-                                <td>Total</td>
-                                <td>${formatCurrency(totalDividends)}</td>
-                                <td>${formatCurrency(totalJCP)}</td>
-                                <td>${formatCurrency(totalIncome)}</td>
-                            </tr>
-                        </tbody>
-                    `;
-                    dividendsSection.appendChild(table);
-                    assetSection.appendChild(dividendsSection);
-                }
-                
-                reportContainer.appendChild(assetSection);
-            });
+                </div>
+            `;
+            reportContainer.appendChild(generalSummary);
         }
         
         // Atualizar dropdowns de ativos
@@ -985,17 +1211,35 @@
             transactionAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             
-            // Ordenar ativos por nome (ordem crescente)
-            const sortedAssets = sortAssetsByName(db.assets);
+            // Ordenar ativos por tipo e nome
+            const sortedAssets = sortAssets(db.assets);
             
-            // Adicionar opções
+            // Adicionar opções agrupadas por tipo
+            let currentType = null;
+            
             sortedAssets.forEach(asset => {
+                if (asset.type !== currentType) {
+                    currentType = asset.type;
+                    const group = document.createElement('optgroup');
+                    group.label = currentType;
+                    
+                    const transactionGroup = group.cloneNode(true);
+                    const dividendGroup = group.cloneNode(true);
+                    
+                    transactionAssetSelect.appendChild(transactionGroup);
+                    dividendAssetSelect.appendChild(dividendGroup);
+                }
+                
                 const option = document.createElement('option');
                 option.value = asset.id;
                 option.textContent = `${asset.name} (${asset.code})`;
                 
-                transactionAssetSelect.appendChild(option.cloneNode(true));
-                dividendAssetSelect.appendChild(option);
+                // Encontrar o último optgroup adicionado
+                const transactionGroups = transactionAssetSelect.getElementsByTagName('optgroup');
+                const dividendGroups = dividendAssetSelect.getElementsByTagName('optgroup');
+                
+                transactionGroups[transactionGroups.length - 1].appendChild(option.cloneNode(true));
+                dividendGroups[dividendGroups.length - 1].appendChild(option);
             });
         }
         
@@ -1012,9 +1256,10 @@
                 const asset = db.assets.find(a => a.id === assetId);
                 if (asset) {
                     document.getElementById('assetId').value = asset.id;
+                    document.getElementById('assetType').value = asset.type;
                     document.getElementById('assetName').value = asset.name;
                     document.getElementById('assetCode').value = asset.code;
-                    document.getElementById('assetCnpj').value = asset.cnpj;
+                    document.getElementById('assetCnpj').value = asset.cnpj || '';
                 }
             } else {
                 title.textContent = 'Adicionar Ativo';
@@ -1027,20 +1272,28 @@
         function saveAsset() {
             const form = document.getElementById('assetForm');
             const assetId = document.getElementById('assetId').value;
+            const type = document.getElementById('assetType').value;
             const name = document.getElementById('assetName').value.trim();
             const code = document.getElementById('assetCode').value.trim();
             const cnpj = document.getElementById('assetCnpj').value.trim();
             
-            if (!name || !code || !cnpj) {
+            if (!type || !name || !code) {
                 showNotification('Preencha todos os campos obrigatórios', true);
+                return;
+            }
+            
+            // CNPJ só é obrigatório para alguns tipos de ativos
+            if ((type === 'Ação' || type === 'FII' || type === 'BDR') && !cnpj) {
+                showNotification('CNPJ é obrigatório para este tipo de ativo', true);
                 return;
             }
             
             const assetData = {
                 id: assetId ? parseInt(assetId) : db.nextId++,
+                type,
                 name,
                 code,
-                cnpj
+                cnpj: cnpj || null
             };
             
             if (assetId) {
@@ -1211,8 +1464,11 @@
                         th { background-color: #f1f3f4; }
                         .summary-section { margin-top: 20px; }
                         .summary-section-title { font-size: 16px; font-weight: bold; color: #1a73e8; margin-bottom: 10px; }
+                        .category-header { background-color: #e8f0fe; padding: 10px 15px; margin: 20px 0 10px 0; border-radius: 4px; font-weight: bold; color: #1a73e8; }
                         @media print {
                             .no-print { display: none; }
+                            body { font-size: 12px; }
+                            .asset-details { grid-template-columns: 1fr 1fr; }
                         }
                     </style>
                 </head>
