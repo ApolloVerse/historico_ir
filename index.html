@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de IR</title>
+    <title>Gerenciador de Ativos para IR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
@@ -42,7 +42,6 @@
             padding: 16px 0;
             margin-bottom: 20px;
             position: relative;
-            z-index: 100;
         }
         
         .header-content {
@@ -67,7 +66,15 @@
             font-size: 24px;
             color: var(--primary);
             cursor: pointer;
-            z-index: 101;
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .mobile-menu-btn.active {
+            transform: rotate(90deg);
         }
         
         .tabs {
@@ -82,7 +89,7 @@
             cursor: pointer;
             font-weight: 500;
             position: relative;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
         }
         
         .tab:hover {
@@ -101,10 +108,22 @@
             right: 0;
             height: 3px;
             background-color: var(--primary);
+            animation: tabUnderline 0.3s ease-out;
+        }
+        
+        @keyframes tabUnderline {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
         }
         
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .tab-content.active {
@@ -117,6 +136,12 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
+            animation: cardAppear 0.4s ease-out;
+        }
+        
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .button {
@@ -131,28 +156,50 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
         }
         
         .button:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button:active {
+            transform: translateY(0);
         }
         
         .button.danger {
             background-color: var(--danger);
         }
         
+        .button.danger:hover {
+            background-color: #c5221f;
+        }
+        
         .button.success {
             background-color: var(--success);
+        }
+        
+        .button.success:hover {
+            background-color: #0b8043;
         }
         
         .button.warning {
             background-color: var(--warning);
         }
         
+        .button.warning:hover {
+            background-color: #e6a700;
+        }
+        
         .button.secondary {
             background-color: var(--gray-light);
             color: var(--text);
+        }
+        
+        .button.secondary:hover {
+            background-color: #e0e0e0;
         }
         
         .button.small {
@@ -181,6 +228,10 @@
             font-weight: 500;
         }
         
+        tr {
+            transition: background-color 0.2s;
+        }
+        
         tr:hover {
             background-color: #e8f0fe;
         }
@@ -196,6 +247,7 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease-out;
         }
         
         .modal-content {
@@ -206,6 +258,12 @@
             max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
+            transform: translateY(-20px);
+            animation: modalAppear 0.3s ease-out forwards;
+        }
+        
+        @keyframes modalAppear {
+            to { transform: translateY(0); }
         }
         
         .modal-header {
@@ -227,6 +285,12 @@
             font-size: 22px;
             cursor: pointer;
             color: #5f6368;
+            transition: transform 0.2s;
+        }
+        
+        .modal-close:hover {
+            transform: rotate(90deg);
+            color: var(--danger);
         }
         
         .modal-body {
@@ -258,6 +322,7 @@
             border: 1px solid var(--gray-light);
             border-radius: 4px;
             font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         
         .form-control:focus {
@@ -292,7 +357,7 @@
             z-index: 1001;
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.3s, transform 0.3s;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
         
         .notification.show {
@@ -422,25 +487,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .report-category-header:hover {
+            filter: brightness(1.1);
         }
         
         .report-category-header i {
-            transition: transform 0.2s ease-out;
+            transition: transform 0.3s ease;
         }
         
-        .report-category-header.collapsed i {
+        .report-category.collapsed .report-category-header i {
             transform: rotate(-90deg);
         }
         
         .report-assets {
             padding: 10px;
-            transition: max-height 0.2s ease-out;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
             overflow: hidden;
+            max-height: 0;
         }
         
-        .report-category.collapsed .report-assets {
-            max-height: 0 !important;
-            padding: 0;
+        .report-category:not(.collapsed) .report-assets {
+            max-height: 2000px;
         }
         
         .report-asset {
@@ -448,6 +518,12 @@
             border: 1px solid var(--gray-light);
             border-radius: 6px;
             overflow: hidden;
+            transition: transform 0.2s;
+        }
+        
+        .report-asset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .report-asset-header {
@@ -493,13 +569,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .report-summary-header:hover {
+            background-color: #0b3d91;
         }
         
         .report-summary-header i {
-            transition: transform 0.2s ease-out;
+            transition: transform 0.3s ease;
         }
         
-        .report-summary-header.collapsed i {
+        .report-summary.collapsed .report-summary-header i {
             transform: rotate(-90deg);
         }
         
@@ -509,13 +590,13 @@
             gap: 15px;
             padding: 15px;
             background-color: white;
-            transition: max-height 0.2s ease-out;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
             overflow: hidden;
+            max-height: 0;
         }
         
-        .report-summary.collapsed .report-summary-details {
-            max-height: 0 !important;
-            padding: 0;
+        .report-summary:not(.collapsed) .report-summary-details {
+            max-height: 500px;
         }
         
         .report-summary-item {
@@ -541,8 +622,8 @@
             }
             
             .tabs {
-                position: fixed;
-                top: 70px;
+                position: absolute;
+                top: 100%;
                 left: 0;
                 right: 0;
                 background-color: white;
@@ -551,18 +632,23 @@
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 max-height: 0;
                 overflow: hidden;
-                transition: max-height 0.3s ease-out;
-                z-index: 99;
+                transition: max-height 0.5s cubic-bezier(0.77, 0.2, 0.05, 1);
+                z-index: 100;
             }
             
             .tabs.show {
                 max-height: 500px;
-                padding: 10px 0;
             }
             
             .tab {
                 width: 100%;
                 border-bottom: 1px solid var(--gray-light);
+                padding: 15px 20px;
+                transition: background-color 0.3s;
+            }
+            
+            .tab:hover {
+                background-color: rgba(0, 0, 0, 0.05);
             }
             
             .tab.active::after {
@@ -610,7 +696,7 @@
         <div class="container header-content">
             <div class="logo">
                 <i class="fas fa-chart-line"></i>
-                <span>Gerenciador de IR</span>
+                <span>Gerenciador de Ativos para IR</span>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
@@ -1008,6 +1094,7 @@
                     // Esconder menu mobile após seleção
                     if (window.innerWidth <= 768) {
                         document.getElementById('mainTabs').classList.remove('show');
+                        document.getElementById('mobileMenuBtn').classList.remove('active');
                     }
                 });
             });
@@ -1018,14 +1105,17 @@
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const tabsContainer = document.getElementById('mainTabs');
             
-            mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 tabsContainer.classList.toggle('show');
+                mobileMenuBtn.classList.toggle('active');
             });
             
             // Fechar menu ao clicar fora
             document.addEventListener('click', (e) => {
                 if (!tabsContainer.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
                     tabsContainer.classList.remove('show');
+                    mobileMenuBtn.classList.remove('active');
                 }
             });
         }
@@ -1264,36 +1354,19 @@
         
         // Configurar abas expansíveis no relatório
         function setupExpandableReportTabs() {
-            document.addEventListener('click', function(e) {
-                // Verificar se o clique foi em um cabeçalho de categoria
-                if (e.target.classList.contains('report-category-header') || 
-                    e.target.parentElement.classList.contains('report-category-header')) {
-                    const header = e.target.classList.contains('report-category-header') ? 
-                        e.target : e.target.parentElement;
-                    const category = header.parentElement;
-                    category.classList.toggle('collapsed');
+            document.querySelectorAll('.report-category-header, .report-summary-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const parent = this.parentElement;
+                    parent.classList.toggle('collapsed');
                     
-                    // Atualizar altura máxima do conteúdo
-                    if (!category.classList.contains('collapsed')) {
-                        const assets = category.querySelector('.report-assets');
-                        assets.style.maxHeight = assets.scrollHeight + 'px';
+                    // Atualizar ícone
+                    const icon = this.querySelector('i');
+                    if (parent.classList.contains('collapsed')) {
+                        icon.style.transform = 'rotate(-90deg)';
+                    } else {
+                        icon.style.transform = 'rotate(0deg)';
                     }
-                }
-                
-                // Verificar se o clique foi no cabeçalho do resumo
-                if (e.target.classList.contains('report-summary-header') || 
-                    e.target.parentElement.classList.contains('report-summary-header')) {
-                    const header = e.target.classList.contains('report-summary-header') ? 
-                        e.target : e.target.parentElement;
-                    const summary = header.parentElement;
-                    summary.classList.toggle('collapsed');
-                    
-                    // Atualizar altura máxima do conteúdo
-                    if (!summary.classList.contains('collapsed')) {
-                        const details = summary.querySelector('.report-summary-details');
-                        details.style.maxHeight = details.scrollHeight + 'px';
-                    }
-                }
+                });
             });
         }
         
@@ -1334,7 +1407,7 @@
                 
                 // Criar container para a categoria
                 const categoryContainer = document.createElement('div');
-                categoryContainer.className = 'report-category collapsed'; // Inicia colapsado
+                categoryContainer.className = 'report-category collapsed';
                 categoriesContainer.appendChild(categoryContainer);
                 
                 // Cabeçalho da categoria (expansível)
@@ -1448,9 +1521,6 @@
                 `;
                 assetsContainer.appendChild(categorySummary);
                 
-                // Definir altura máxima inicial (será 0 porque está colapsado)
-                assetsContainer.style.maxHeight = '0';
-                
                 // Atualizar totais gerais
                 totalInvested += categoryTotalInvested;
                 totalDividends += categoryTotalDividends;
@@ -1462,7 +1532,7 @@
             const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100).toFixed(2) : 0;
             
             const generalSummary = document.createElement('div');
-            generalSummary.className = 'report-summary collapsed'; // Inicia colapsado
+            generalSummary.className = 'report-summary collapsed';
             generalSummary.innerHTML = `
                 <div class="report-summary-header">
                     <span>Resumo Geral</span>
@@ -1488,10 +1558,6 @@
                 </div>
             `;
             reportWrapper.appendChild(generalSummary);
-            
-            // Definir altura máxima inicial (será 0 porque está colapsado)
-            const summaryDetails = generalSummary.querySelector('.report-summary-details');
-            summaryDetails.style.maxHeight = '0';
             
             // Configurar eventos para as abas expansíveis
             setupExpandableReportTabs();
