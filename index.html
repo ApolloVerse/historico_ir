@@ -28,6 +28,11 @@
         body {
             background-color: #f8f9fa;
             color: var(--text);
+            transition: transform 0.4s ease;
+        }
+        
+        body.menu-open {
+            transform: translateY(150px);
         }
         
         .container {
@@ -42,6 +47,7 @@
             padding: 16px 0;
             margin-bottom: 20px;
             position: relative;
+            z-index: 1000;
         }
         
         .header-content {
@@ -63,18 +69,57 @@
             display: none;
             background: none;
             border: none;
-            font-size: 24px;
-            color: var(--primary);
+            width: 30px;
+            height: 30px;
+            position: relative;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            z-index: 1001;
         }
         
-        .mobile-menu-btn:hover {
-            transform: scale(1.1);
+        .mobile-menu-btn span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
         }
         
-        .mobile-menu-btn.active {
-            transform: rotate(90deg);
+        .mobile-menu-btn span:nth-child(1) {
+            top: 6px;
+        }
+        
+        .mobile-menu-btn span:nth-child(2),
+        .mobile-menu-btn span:nth-child(3) {
+            top: 14px;
+        }
+        
+        .mobile-menu-btn span:nth-child(4) {
+            top: 22px;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(1) {
+            top: 14px;
+            width: 0%;
+            left: 50%;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+        
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+        
+        .mobile-menu-btn.active span:nth-child(4) {
+            top: 14px;
+            width: 0%;
+            left: 50%;
         }
         
         .tabs {
@@ -622,8 +667,8 @@
             }
             
             .tabs {
-                position: absolute;
-                top: 100%;
+                position: fixed;
+                top: 0;
                 left: 0;
                 right: 0;
                 background-color: white;
@@ -633,11 +678,13 @@
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.5s cubic-bezier(0.77, 0.2, 0.05, 1);
-                z-index: 100;
+                z-index: 999;
+                margin-top: 0;
+                padding-top: 70px;
             }
             
             .tabs.show {
-                max-height: 500px;
+                max-height: 100vh;
             }
             
             .tab {
@@ -699,7 +746,10 @@
                 <span>Gerenciador de Ativos para IR</span>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
         </div>
         
@@ -1093,8 +1143,7 @@
                     
                     // Esconder menu mobile após seleção
                     if (window.innerWidth <= 768) {
-                        document.getElementById('mainTabs').classList.remove('show');
-                        document.getElementById('mobileMenuBtn').classList.remove('active');
+                        toggleMobileMenu();
                     }
                 });
             });
@@ -1107,17 +1156,28 @@
             
             mobileMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                tabsContainer.classList.toggle('show');
-                mobileMenuBtn.classList.toggle('active');
+                toggleMobileMenu();
             });
             
-            // Fechar menu ao clicar fora
+            // Fechar menu ao clicar em uma opção ou fora
             document.addEventListener('click', (e) => {
                 if (!tabsContainer.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                    tabsContainer.classList.remove('show');
-                    mobileMenuBtn.classList.remove('active');
+                    if (tabsContainer.classList.contains('show')) {
+                        toggleMobileMenu();
+                    }
                 }
             });
+        }
+        
+        // Alternar menu mobile
+        function toggleMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const tabsContainer = document.getElementById('mainTabs');
+            const body = document.body;
+            
+            mobileMenuBtn.classList.toggle('active');
+            tabsContainer.classList.toggle('show');
+            body.classList.toggle('menu-open');
         }
         
         // Função para ordenar ativos por tipo e depois por nome
