@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de IR</title>
+    <title>Gerenciador de Ativos para IR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
@@ -1121,8 +1121,8 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${asset.type}</td>
-                    <td>${asset.name}</td>
-                    <td>${asset.code}</td>
+                    <td>${asset.name.toUpperCase()}</td>
+                    <td>${asset.code.toUpperCase()}</td>
                     <td>${asset.cnpj || '-'}</td>
                     <td>${formatNumber(assetData.quantity)}</td>
                     <td>${formatCurrency(assetData.avgPrice)}</td>
@@ -1177,7 +1177,7 @@
             
             sortedTransactions.forEach(transaction => {
                 const asset = db.assets.find(a => a.id === transaction.assetId);
-                const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
+                const assetName = asset ? `${asset.name.toUpperCase()} (${asset.code.toUpperCase()})` : 'Ativo desconhecido';
                 const assetType = asset ? asset.type : 'Desconhecido';
                 
                 // Adicionar cabeçalho de categoria se o tipo mudou
@@ -1226,7 +1226,7 @@
             
             sortedDividends.forEach(dividend => {
                 const asset = db.assets.find(a => a.id === dividend.assetId);
-                const assetName = asset ? `${asset.name} (${asset.code})` : 'Ativo desconhecido';
+                const assetName = asset ? `${asset.name.toUpperCase()} (${asset.code.toUpperCase()})` : 'Ativo desconhecido';
                 const assetType = asset ? asset.type : 'Desconhecido';
                 const total = dividend.dividendValue + dividend.jcpValue;
                 
@@ -1325,7 +1325,7 @@
                 
                 // Criar container para a categoria
                 const categoryContainer = document.createElement('div');
-                categoryContainer.className = 'report-category';
+                categoryContainer.className = 'report-category collapsed'; // Inicia colapsado
                 categoriesContainer.appendChild(categoryContainer);
                 
                 // Cabeçalho da categoria (expansível)
@@ -1377,7 +1377,7 @@
                     const assetHeader = document.createElement('div');
                     assetHeader.className = 'report-asset-header ' + assetTypeClasses[type];
                     assetHeader.innerHTML = `
-                        <div>${asset.name} (${asset.code})</div>
+                        <div>${asset.name.toUpperCase()} (${asset.code.toUpperCase()})</div>
                         <div style="font-size: 11px;">${asset.cnpj || ''}</div>
                     `;
                     assetCard.appendChild(assetHeader);
@@ -1439,8 +1439,8 @@
                 `;
                 assetsContainer.appendChild(categorySummary);
                 
-                // Definir altura máxima inicial
-                assetsContainer.style.maxHeight = assetsContainer.scrollHeight + 'px';
+                // Definir altura máxima inicial (será 0 porque está colapsado)
+                assetsContainer.style.maxHeight = '0';
                 
                 // Atualizar totais gerais
                 totalInvested += categoryTotalInvested;
@@ -1453,7 +1453,7 @@
             const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100).toFixed(2) : 0;
             
             const generalSummary = document.createElement('div');
-            generalSummary.className = 'report-summary';
+            generalSummary.className = 'report-summary collapsed'; // Inicia colapsado
             generalSummary.innerHTML = `
                 <div class="report-summary-header">
                     <span>Resumo Geral</span>
@@ -1480,9 +1480,9 @@
             `;
             reportWrapper.appendChild(generalSummary);
             
-            // Definir altura máxima inicial para o resumo
+            // Definir altura máxima inicial (será 0 porque está colapsado)
             const summaryDetails = generalSummary.querySelector('.report-summary-details');
-            summaryDetails.style.maxHeight = summaryDetails.scrollHeight + 'px';
+            summaryDetails.style.maxHeight = '0';
             
             // Configurar eventos para as abas expansíveis
             setupExpandableReportTabs();
@@ -1518,7 +1518,7 @@
                 
                 const option = document.createElement('option');
                 option.value = asset.id;
-                option.textContent = `${asset.name} (${asset.code})`;
+                option.textContent = `${asset.name.toUpperCase()} (${asset.code.toUpperCase()})`;
                 
                 // Encontrar o último optgroup adicionado
                 const transactionGroups = transactionAssetSelect.getElementsByTagName('optgroup');
@@ -1559,18 +1559,12 @@
             const form = document.getElementById('assetForm');
             const assetId = document.getElementById('assetId').value;
             const type = document.getElementById('assetType').value;
-            const name = document.getElementById('assetName').value.trim();
-            const code = document.getElementById('assetCode').value.trim();
+            const name = document.getElementById('assetName').value.trim().toUpperCase();
+            const code = document.getElementById('assetCode').value.trim().toUpperCase();
             const cnpj = document.getElementById('assetCnpj').value.trim();
             
             if (!type || !name || !code) {
                 showNotification('Preencha todos os campos obrigatórios', true);
-                return;
-            }
-            
-            // CNPJ só é obrigatório para alguns tipos de ativos
-            if ((type === 'Ação' || type === 'FII' || type === 'BDR') && !cnpj) {
-                showNotification('CNPJ é obrigatório para este tipo de ativo', true);
                 return;
             }
             
