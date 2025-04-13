@@ -28,11 +28,6 @@
         body {
             background-color: #f8f9fa;
             color: var(--text);
-            transition: transform 0.4s ease;
-        }
-        
-        body.menu-open {
-            transform: translateY(150px);
         }
         
         .container {
@@ -47,7 +42,6 @@
             padding: 16px 0;
             margin-bottom: 20px;
             position: relative;
-            z-index: 1000;
         }
         
         .header-content {
@@ -69,57 +63,49 @@
             display: none;
             background: none;
             border: none;
+            font-size: 24px;
+            color: var(--primary);
+            cursor: pointer;
             width: 30px;
             height: 30px;
             position: relative;
-            cursor: pointer;
-            z-index: 1001;
+            transition: all 0.3s ease;
         }
         
-        .mobile-menu-btn span {
-            display: block;
+        .mobile-menu-btn .hamburger-line {
             position: absolute;
-            height: 3px;
             width: 100%;
-            background: var(--primary);
+            height: 3px;
+            background-color: var(--primary);
+            transition: all 0.3s ease;
             border-radius: 3px;
-            opacity: 1;
-            left: 0;
-            transform: rotate(0deg);
-            transition: .25s ease-in-out;
         }
         
-        .mobile-menu-btn span:nth-child(1) {
-            top: 6px;
+        .mobile-menu-btn .hamburger-line:nth-child(1) {
+            top: 5px;
         }
         
-        .mobile-menu-btn span:nth-child(2),
-        .mobile-menu-btn span:nth-child(3) {
-            top: 14px;
+        .mobile-menu-btn .hamburger-line:nth-child(2) {
+            top: 50%;
+            transform: translateY(-50%);
         }
         
-        .mobile-menu-btn span:nth-child(4) {
-            top: 22px;
+        .mobile-menu-btn .hamburger-line:nth-child(3) {
+            bottom: 5px;
         }
         
-        .mobile-menu-btn.active span:nth-child(1) {
-            top: 14px;
-            width: 0%;
-            left: 50%;
+        .mobile-menu-btn.active .hamburger-line:nth-child(1) {
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
         }
         
-        .mobile-menu-btn.active span:nth-child(2) {
-            transform: rotate(45deg);
+        .mobile-menu-btn.active .hamburger-line:nth-child(2) {
+            opacity: 0;
         }
         
-        .mobile-menu-btn.active span:nth-child(3) {
-            transform: rotate(-45deg);
-        }
-        
-        .mobile-menu-btn.active span:nth-child(4) {
-            top: 14px;
-            width: 0%;
-            left: 50%;
+        .mobile-menu-btn.active .hamburger-line:nth-child(3) {
+            bottom: 50%;
+            transform: translateY(50%) rotate(-45deg);
         }
         
         .tabs {
@@ -667,8 +653,8 @@
             }
             
             .tabs {
-                position: fixed;
-                top: 0;
+                position: absolute;
+                top: 100%;
                 left: 0;
                 right: 0;
                 background-color: white;
@@ -678,13 +664,11 @@
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.5s cubic-bezier(0.77, 0.2, 0.05, 1);
-                z-index: 999;
-                margin-top: 0;
-                padding-top: 70px;
+                z-index: 100;
             }
             
             .tabs.show {
-                max-height: 100vh;
+                max-height: 500px;
             }
             
             .tab {
@@ -746,10 +730,9 @@
                 <span>Gerenciador de Ativos para IR</span>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
             </button>
         </div>
         
@@ -1143,7 +1126,8 @@
                     
                     // Esconder menu mobile após seleção
                     if (window.innerWidth <= 768) {
-                        toggleMobileMenu();
+                        document.getElementById('mainTabs').classList.remove('show');
+                        document.getElementById('mobileMenuBtn').classList.remove('active');
                     }
                 });
             });
@@ -1156,28 +1140,17 @@
             
             mobileMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                toggleMobileMenu();
+                tabsContainer.classList.toggle('show');
+                mobileMenuBtn.classList.toggle('active');
             });
             
-            // Fechar menu ao clicar em uma opção ou fora
+            // Fechar menu ao clicar fora
             document.addEventListener('click', (e) => {
                 if (!tabsContainer.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                    if (tabsContainer.classList.contains('show')) {
-                        toggleMobileMenu();
-                    }
+                    tabsContainer.classList.remove('show');
+                    mobileMenuBtn.classList.remove('active');
                 }
             });
-        }
-        
-        // Alternar menu mobile
-        function toggleMobileMenu() {
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const tabsContainer = document.getElementById('mainTabs');
-            const body = document.body;
-            
-            mobileMenuBtn.classList.toggle('active');
-            tabsContainer.classList.toggle('show');
-            body.classList.toggle('menu-open');
         }
         
         // Função para ordenar ativos por tipo e depois por nome
