@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Ativos para IR</title>
+    <title>Gerenciador IR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
@@ -42,6 +42,7 @@
             padding: 16px 0;
             margin-bottom: 20px;
             position: relative;
+            z-index: 100;
         }
         
         .header-content {
@@ -66,6 +67,7 @@
             font-size: 24px;
             color: var(--primary);
             cursor: pointer;
+            z-index: 101;
         }
         
         .tabs {
@@ -423,7 +425,7 @@
         }
         
         .report-category-header i {
-            transition: transform 0.3s;
+            transition: transform 0.2s ease-out;
         }
         
         .report-category-header.collapsed i {
@@ -432,7 +434,7 @@
         
         .report-assets {
             padding: 10px;
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.2s ease-out;
             overflow: hidden;
         }
         
@@ -494,7 +496,7 @@
         }
         
         .report-summary-header i {
-            transition: transform 0.3s;
+            transition: transform 0.2s ease-out;
         }
         
         .report-summary-header.collapsed i {
@@ -507,7 +509,7 @@
             gap: 15px;
             padding: 15px;
             background-color: white;
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.2s ease-out;
             overflow: hidden;
         }
         
@@ -539,8 +541,8 @@
             }
             
             .tabs {
-                position: absolute;
-                top: 100%;
+                position: fixed;
+                top: 70px;
                 left: 0;
                 right: 0;
                 background-color: white;
@@ -550,11 +552,12 @@
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.3s ease-out;
-                z-index: 100;
+                z-index: 99;
             }
             
             .tabs.show {
                 max-height: 500px;
+                padding: 10px 0;
             }
             
             .tab {
@@ -1284,6 +1287,12 @@
                         e.target : e.target.parentElement;
                     const summary = header.parentElement;
                     summary.classList.toggle('collapsed');
+                    
+                    // Atualizar altura máxima do conteúdo
+                    if (!summary.classList.contains('collapsed')) {
+                        const details = summary.querySelector('.report-summary-details');
+                        details.style.maxHeight = details.scrollHeight + 'px';
+                    }
                 }
             });
         }
