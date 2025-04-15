@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Ativos para IR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #1a73e8;
@@ -646,6 +649,128 @@
             font-size: 14px;
         }
         
+        /* Novos estilos para gráficos e relatórios avançados */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .chart-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .benchmark-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .benchmark-selector label {
+            font-weight: 500;
+        }
+        
+        .benchmark-selector select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .tax-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .tax-table th, .tax-table td {
+            padding: 10px;
+            border: 1px solid var(--gray-light);
+            text-align: left;
+        }
+        
+        .tax-table th {
+            background-color: var(--secondary);
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Tela de seleção de corretora */
+        .broker-selection {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .broker-selection h1 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .broker-form {
+            margin-bottom: 30px;
+        }
+        
+        .broker-list {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .broker-item {
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .broker-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .broker-item-name {
+            font-weight: 500;
+        }
+        
+        .broker-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .current-broker {
+            background-color: #e8f0fe;
+            border-color: var(--primary);
+        }
+        
         /* Estilos para mobile */
         @media (max-width: 768px) {
             .mobile-menu-btn {
@@ -719,276 +844,391 @@
                 padding: 8px 12px;
                 font-size: 13px;
             }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .report-actions, .export-options {
+                flex-direction: column;
+            }
+            
+            .broker-selection {
+                margin: 20px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <i class="fas fa-chart-line"></i>
-                <span>Gerenciador de Ativos para IR</span>
+    <!-- Tela de seleção de corretora -->
+    <div id="brokerSelectionScreen" class="broker-selection">
+        <h1><i class="fas fa-building"></i> Selecione ou Crie uma Corretora</h1>
+        
+        <div class="broker-form">
+            <div class="form-group">
+                <label for="brokerName">Nome da Corretora</label>
+                <input type="text" class="form-control" id="brokerName" placeholder="Ex: XP Investimentos, Rico, Clear, etc.">
             </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
+            <button class="button" id="createBrokerBtn">
+                <i class="fas fa-plus"></i>
+                <span>Criar/Selecionar Corretora</span>
             </button>
         </div>
         
+        <div class="broker-list" id="brokerList">
+            <h3>Suas Corretoras:</h3>
+            <!-- Lista de corretoras será preenchida via JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Aplicativo principal (inicialmente oculto) -->
+    <div id="appContainer" style="display: none;">
+        <header>
+            <div class="container header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="currentBrokerName">Gerenciador de Ativos para IR</span>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                <button class="button secondary" id="changeBrokerBtn" style="margin-left: auto; margin-right: 10px;">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Trocar Corretora</span>
+                </button>
+            </div>
+            
+            <div class="container">
+                <div class="tabs" id="mainTabs">
+                    <div class="tab active" data-tab="assets">Ativos</div>
+                    <div class="tab" data-tab="transactions">Transações</div>
+                    <div class="tab" data-tab="dividends">Rendimentos</div>
+                    <div class="tab" data-tab="report">Relatório Completo</div>
+                    <div class="tab" data-tab="analysis">Análises</div>
+                </div>
+            </div>
+        </header>
+        
         <div class="container">
-            <div class="tabs" id="mainTabs">
-                <div class="tab active" data-tab="assets">Ativos</div>
-                <div class="tab" data-tab="transactions">Transações</div>
-                <div class="tab" data-tab="dividends">Rendimentos</div>
-                <div class="tab" data-tab="report">Relatório Completo</div>
+            <!-- Aba de Ativos -->
+            <div class="tab-content active" id="assets">
+                <div class="card">
+                    <button class="button" id="addAssetBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Adicionar Ativo</span>
+                    </button>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Ativo</th>
+                                    <th>Código</th>
+                                    <th>CNPJ</th>
+                                    <th>Quantidade</th>
+                                    <th>Preço Médio</th>
+                                    <th>Total Investido</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetTable">
+                                <!-- Dados serão inseridos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
-    </header>
-    
-    <div class="container">
-        <!-- Aba de Ativos -->
-        <div class="tab-content active" id="assets">
-            <div class="card">
-                <button class="button" id="addAssetBtn">
-                    <i class="fas fa-plus"></i>
-                    <span>Adicionar Ativo</span>
-                </button>
+            
+            <!-- Aba de Transações -->
+            <div class="tab-content" id="transactions">
+                <div class="card">
+                    <button class="button" id="addTransactionBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Nova Transação</span>
+                    </button>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data da Compra</th>
+                                    <th>Tipo</th>
+                                    <th>Ativo</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Unitário</th>
+                                    <th>Total da Compra</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTable">
+                                <!-- Dados serão inseridos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba de Rendimentos -->
+            <div class="tab-content" id="dividends">
+                <div class="card">
+                    <button class="button" id="addDividendBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Novo Rendimento</span>
+                    </button>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data Pagamento</th>
+                                    <th>Tipo</th>
+                                    <th>Ativo</th>
+                                    <th>Dividendos (R$)</th>
+                                    <th>JCP (R$)</th>
+                                    <th>Total (R$)</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dividendTable">
+                                <!-- Dados serão inseridos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba de Relatório Completo -->
+            <div class="tab-content" id="report">
+                <div class="card">
+                    <div class="report-actions">
+                        <button class="button warning" id="printReportBtn">
+                            <i class="fas fa-print"></i>
+                            <span>Imprimir Relatório</span>
+                        </button>
+                        <button class="button secondary" id="exportPdfBtn">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Exportar PDF</span>
+                        </button>
+                        <button class="button success" id="exportExcelBtn">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Exportar Excel</span>
+                        </button>
+                    </div>
+                    
+                    <div id="fullReport">
+                        <!-- Relatório completo será gerado aqui -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nova Aba de Análises -->
+            <div class="tab-content" id="analysis">
+                <div class="card">
+                    <h2 class="chart-title">Evolução Patrimonial</h2>
+                    <div class="chart-container">
+                        <canvas id="netWorthChart"></canvas>
+                    </div>
+                </div>
                 
-                <div class="table-container">
-                    <table>
+                <div class="card">
+                    <div class="benchmark-selector">
+                        <label for="benchmarkSelect">Comparar com:</label>
+                        <select id="benchmarkSelect" class="form-control">
+                            <option value="none">Nenhum</option>
+                            <option value="ibov">IBOVESPA</option>
+                            <option value="ifix">IFIX</option>
+                            <option value="cdi">CDI</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="chart-title">Distribuição de Ativos</h2>
+                    <div class="chart-container">
+                        <canvas id="assetDistributionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="chart-title">Rendimentos Mensais</h2>
+                    <div class="chart-container">
+                        <canvas id="dividendsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="chart-title">Cálculo de Impostos</h2>
+                    <table class="tax-table">
                         <thead>
                             <tr>
-                                <th>Tipo</th>
-                                <th>Ativo</th>
-                                <th>Código</th>
-                                <th>CNPJ</th>
-                                <th>Quantidade</th>
-                                <th>Preço Médio</th>
-                                <th>Total Investido</th>
-                                <th>Ações</th>
+                                <th>Tipo de Ativo</th>
+                                <th>Lucro (R$)</th>
+                                <th>Imposto Devido (R$)</th>
+                                <th>Alíquota</th>
                             </tr>
                         </thead>
-                        <tbody id="assetTable">
+                        <tbody id="taxTable">
                             <!-- Dados serão inseridos via JavaScript -->
                         </tbody>
                     </table>
+                    
+                    <div class="export-options">
+                        <button class="button danger" id="generateDarfBtn">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Gerar DARF</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Aba de Transações -->
-        <div class="tab-content" id="transactions">
-            <div class="card">
-                <button class="button" id="addTransactionBtn">
-                    <i class="fas fa-plus"></i>
-                    <span>Nova Transação</span>
-                </button>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data da Compra</th>
-                                <th>Tipo</th>
-                                <th>Ativo</th>
-                                <th>Quantidade</th>
-                                <th>Valor Unitário</th>
-                                <th>Total da Compra</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionTable">
-                            <!-- Dados serão inseridos via JavaScript -->
-                        </tbody>
-                    </table>
+        <!-- Modal de Ativo -->
+        <div class="modal" id="assetModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="assetModalTitle">Adicionar Ativo</h3>
+                    <button class="modal-close" id="closeAssetModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="assetForm">
+                        <input type="hidden" id="assetId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="assetType">Tipo de Ativo</label>
+                                <select class="form-control" id="assetType" required>
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="Ação">Ação</option>
+                                    <option value="FII">Fundo Imobiliário (FII)</option>
+                                    <option value="BDR">BDR</option>
+                                    <option value="CDB">CDB</option>
+                                    <option value="Tesouro Direto">Tesouro Direto</option>
+                                    <option value="Crypto">Criptomoeda</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assetName">Nome do Ativo</label>
+                                <input type="text" class="form-control" id="assetName" placeholder="Ex: BANCO BRADESCO S.A" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="assetCode">Código</label>
+                                <input type="text" class="form-control" id="assetCode" placeholder="Ex: BBDC4" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="assetCnpj">CNPJ</label>
+                                <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="button secondary" id="cancelAssetBtn">Cancelar</button>
+                    <button class="button" id="saveAssetBtn">Salvar</button>
                 </div>
             </div>
         </div>
         
-        <!-- Aba de Rendimentos -->
-        <div class="tab-content" id="dividends">
-            <div class="card">
-                <button class="button" id="addDividendBtn">
-                    <i class="fas fa-plus"></i>
-                    <span>Novo Rendimento</span>
-                </button>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data Pagamento</th>
-                                <th>Tipo</th>
-                                <th>Ativo</th>
-                                <th>Dividendos (R$)</th>
-                                <th>JCP (R$)</th>
-                                <th>Total (R$)</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dividendTable">
-                            <!-- Dados serão inseridos via JavaScript -->
-                        </tbody>
-                    </table>
+        <!-- Modal de Transação -->
+        <div class="modal" id="transactionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Nova Transação</h3>
+                    <button class="modal-close" id="closeTransactionModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transactionDate">Data da Compra</label>
+                                <input type="date" class="form-control" id="transactionDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionAsset">Ativo</label>
+                                <select class="form-control" id="transactionAsset" required>
+                                    <option value="">Selecione um ativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transactionQuantity">Quantidade</label>
+                                <input type="text" class="form-control" id="transactionQuantity" placeholder="Ex: 100 ou 100,5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionPrice">Valor Unitário</label>
+                                <input type="text" class="form-control" id="transactionPrice" placeholder="Ex: 25.99 ou 25,99" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="button secondary" id="cancelTransactionBtn">Cancelar</button>
+                    <button class="button" id="saveTransactionBtn">Salvar</button>
                 </div>
             </div>
         </div>
         
-        <!-- Aba de Relatório Completo -->
-        <div class="tab-content" id="report">
-            <div class="card">
-                <button class="button warning" id="printReportBtn">
-                    <i class="fas fa-print"></i>
-                    <span>Imprimir Relatório</span>
-                </button>
-                
-                <div id="fullReport">
-                    <!-- Relatório completo será gerado aqui -->
+        <!-- Modal de Rendimento -->
+        <div class="modal" id="dividendModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Novo Rendimento</h3>
+                    <button class="modal-close" id="closeDividendModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="dividendForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dividendDate">Data de Pagamento</label>
+                                <input type="date" class="form-control" id="dividendDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dividendAsset">Ativo</label>
+                                <select class="form-control" id="dividendAsset" required>
+                                    <option value="">Selecione um ativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dividendValue">Dividendos (R$)</label>
+                                <input type="text" class="form-control" id="dividendValue" placeholder="Ex: 50.99 ou 50,99" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="jcpValue">JCP (R$)</label>
+                                <input type="text" class="form-control" id="jcpValue" placeholder="Ex: 10.50 ou 10,50" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="button secondary" id="cancelDividendBtn">Cancelar</button>
+                    <button class="button success" id="saveDividendBtn">Salvar</button>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Modal de Ativo -->
-    <div class="modal" id="assetModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="assetModalTitle">Adicionar Ativo</h3>
-                <button class="modal-close" id="closeAssetModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="assetForm">
-                    <input type="hidden" id="assetId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="assetType">Tipo de Ativo</label>
-                            <select class="form-control" id="assetType" required>
-                                <option value="">Selecione o tipo</option>
-                                <option value="Ação">Ação</option>
-                                <option value="FII">Fundo Imobiliário (FII)</option>
-                                <option value="BDR">BDR</option>
-                                <option value="CDB">CDB</option>
-                                <option value="Tesouro Direto">Tesouro Direto</option>
-                                <option value="Crypto">Criptomoeda</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="assetName">Nome do Ativo</label>
-                            <input type="text" class="form-control" id="assetName" placeholder="Ex: BANCO BRADESCO S.A" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="assetCode">Código</label>
-                            <input type="text" class="form-control" id="assetCode" placeholder="Ex: BBDC4" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="assetCnpj">CNPJ</label>
-                            <input type="text" class="form-control" id="assetCnpj" placeholder="Ex: 00.000.000/0001-00">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="button secondary" id="cancelAssetBtn">Cancelar</button>
-                <button class="button" id="saveAssetBtn">Salvar</button>
-            </div>
+        
+        <!-- Notificação -->
+        <div class="notification" id="notification">
+            <i class="fas fa-check-circle"></i>
+            <span id="notificationMessage"></span>
         </div>
-    </div>
-    
-    <!-- Modal de Transação -->
-    <div class="modal" id="transactionModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Nova Transação</h3>
-                <button class="modal-close" id="closeTransactionModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="transactionForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="transactionDate">Data da Compra</label>
-                            <input type="date" class="form-control" id="transactionDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="transactionAsset">Ativo</label>
-                            <select class="form-control" id="transactionAsset" required>
-                                <option value="">Selecione um ativo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="transactionQuantity">Quantidade</label>
-                            <input type="text" class="form-control" id="transactionQuantity" placeholder="Ex: 100 ou 100,5" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="transactionPrice">Valor Unitário</label>
-                            <input type="text" class="form-control" id="transactionPrice" placeholder="Ex: 25.99 ou 25,99" required>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="button secondary" id="cancelTransactionBtn">Cancelar</button>
-                <button class="button" id="saveTransactionBtn">Salvar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de Rendimento -->
-    <div class="modal" id="dividendModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Novo Rendimento</h3>
-                <button class="modal-close" id="closeDividendModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="dividendForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dividendDate">Data de Pagamento</label>
-                            <input type="date" class="form-control" id="dividendDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="dividendAsset">Ativo</label>
-                            <select class="form-control" id="dividendAsset" required>
-                                <option value="">Selecione um ativo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dividendValue">Dividendos (R$)</label>
-                            <input type="text" class="form-control" id="dividendValue" placeholder="Ex: 50.99 ou 50,99" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="jcpValue">JCP (R$)</label>
-                            <input type="text" class="form-control" id="jcpValue" placeholder="Ex: 10.50 ou 10,50" required>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="button secondary" id="cancelDividendBtn">Cancelar</button>
-                <button class="button success" id="saveDividendBtn">Salvar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Notificação -->
-    <div class="notification" id="notification">
-        <i class="fas fa-check-circle"></i>
-        <span id="notificationMessage"></span>
     </div>
     
     <script>
         // Banco de dados em memória
-        let db = {
-            assets: [],
-            transactions: [],
-            dividends: [],
+        let appData = {
+            brokers: [],
+            currentBrokerId: null,
+            nextBrokerId: 1,
             nextId: 1
         };
         
@@ -1022,27 +1262,55 @@
             "Crypto": "asset-color-crypto"
         };
         
+        // Variáveis para os gráficos
+        let netWorthChart, performanceChart, assetDistributionChart, dividendsChart;
+        
+        // Obter dados do broker atual
+        function getCurrentBrokerData() {
+            if (!appData.currentBrokerId) return null;
+            const broker = appData.brokers.find(b => b.id === appData.currentBrokerId);
+            return broker || null;
+        }
+        
+        // Obter dados completos do broker atual
+        function getCurrentBrokerFullData() {
+            const broker = getCurrentBrokerData();
+            if (!broker) return null;
+            
+            return {
+                ...broker,
+                assets: broker.assets || [],
+                transactions: broker.transactions || [],
+                dividends: broker.dividends || []
+            };
+        }
+        
         // Carregar dados do localStorage
         function loadData() {
             const savedData = localStorage.getItem('investmentTrackerData');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                db.assets = parsedData.assets || [];
-                db.transactions = parsedData.transactions || [];
-                db.dividends = parsedData.dividends || [];
-                db.nextId = parsedData.nextId || 1;
+                appData.brokers = parsedData.brokers || [];
+                appData.currentBrokerId = parsedData.currentBrokerId || null;
+                appData.nextBrokerId = parsedData.nextBrokerId || 1;
+                appData.nextId = parsedData.nextId || 1;
             }
         }
         
         // Salvar dados no localStorage
         function saveData() {
             const dataToSave = {
-                assets: db.assets,
-                transactions: db.transactions,
-                dividends: db.dividends,
-                nextId: db.nextId
+                brokers: appData.brokers,
+                currentBrokerId: appData.currentBrokerId,
+                nextBrokerId: appData.nextBrokerId,
+                nextId: appData.nextId
             };
             localStorage.setItem('investmentTrackerData', JSON.stringify(dataToSave));
+            
+            // Atualizar gráficos após salvar
+            if (appData.currentBrokerId) {
+                updateCharts();
+            }
         }
         
         // Converter string para número, aceitando tanto ponto quanto vírgula como separador decimal
@@ -1124,6 +1392,11 @@
                         renderFullReport();
                     }
                     
+                    // Se for a aba de análises, atualizar os gráficos
+                    if (tabId === 'analysis') {
+                        updateCharts();
+                    }
+                    
                     // Esconder menu mobile após seleção
                     if (window.innerWidth <= 768) {
                         document.getElementById('mainTabs').classList.remove('show');
@@ -1170,10 +1443,10 @@
         }
         
         // Função para ordenar transações por tipo de ativo e depois por nome do ativo
-        function sortTransactions(transactions) {
+        function sortTransactions(transactions, assets) {
             return [...transactions].sort((a, b) => {
-                const assetA = db.assets.find(asset => asset.id === a.assetId);
-                const assetB = db.assets.find(asset => asset.id === b.assetId);
+                const assetA = assets.find(asset => asset.id === a.assetId);
+                const assetB = assets.find(asset => asset.id === b.assetId);
                 
                 if (!assetA || !assetB) return 0;
                 
@@ -1193,10 +1466,10 @@
         }
         
         // Função para ordenar rendimentos por tipo de ativo e depois por nome do ativo
-        function sortDividends(dividends) {
+        function sortDividends(dividends, assets) {
             return [...dividends].sort((a, b) => {
-                const assetA = db.assets.find(asset => asset.id === a.assetId);
-                const assetB = db.assets.find(asset => asset.id === b.assetId);
+                const assetA = assets.find(asset => asset.id === a.assetId);
+                const assetB = assets.find(asset => asset.id === b.assetId);
                 
                 if (!assetA || !assetB) return 0;
                 
@@ -1217,16 +1490,19 @@
         
         // Renderizar tabela de ativos
         function renderAssets() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
             const tbody = document.getElementById('assetTable');
             tbody.innerHTML = '';
             
-            if (db.assets.length === 0) {
+            if (brokerData.assets.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum ativo cadastrado</td></tr>';
                 return;
             }
             
             // Ordenar ativos por tipo e nome
-            const sortedAssets = sortAssets(db.assets);
+            const sortedAssets = sortAssets(brokerData.assets);
             
             let currentType = null;
             
@@ -1268,7 +1544,10 @@
         
         // Calcular dados do ativo (quantidade, preço médio, total investido)
         function calculateAssetData(assetId) {
-            const assetTransactions = db.transactions.filter(t => t.assetId === assetId);
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return { quantity: 0, avgPrice: 0, totalInvested: 0 };
+            
+            const assetTransactions = brokerData.transactions.filter(t => t.assetId === assetId);
             let totalQuantity = 0;
             let totalInvested = 0;
             
@@ -1288,21 +1567,24 @@
         
         // Renderizar tabela de transações
         function renderTransactions() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
             const tbody = document.getElementById('transactionTable');
             tbody.innerHTML = '';
             
-            if (db.transactions.length === 0) {
+            if (brokerData.transactions.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhuma transação cadastrada</td></tr>';
                 return;
             }
             
             // Ordenar transações por tipo e nome do ativo
-            const sortedTransactions = sortTransactions(db.transactions);
+            const sortedTransactions = sortTransactions(brokerData.transactions, brokerData.assets);
             
             let currentType = null;
             
             sortedTransactions.forEach(transaction => {
-                const asset = db.assets.find(a => a.id === transaction.assetId);
+                const asset = brokerData.assets.find(a => a.id === transaction.assetId);
                 const assetName = asset ? `${asset.name.toUpperCase()} (${asset.code.toUpperCase()})` : 'Ativo desconhecido';
                 const assetType = asset ? asset.type : 'Desconhecido';
                 
@@ -1337,21 +1619,24 @@
         
         // Renderizar tabela de rendimentos
         function renderDividends() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
             const tbody = document.getElementById('dividendTable');
             tbody.innerHTML = '';
             
-            if (db.dividends.length === 0) {
+            if (brokerData.dividends.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum rendimento cadastrado</td></tr>';
                 return;
             }
             
             // Ordenar rendimentos por tipo e nome do ativo
-            const sortedDividends = sortDividends(db.dividends);
+            const sortedDividends = sortDividends(brokerData.dividends, brokerData.assets);
             
             let currentType = null;
             
             sortedDividends.forEach(dividend => {
-                const asset = db.assets.find(a => a.id === dividend.assetId);
+                const asset = brokerData.assets.find(a => a.id === dividend.assetId);
                 const assetName = asset ? `${asset.name.toUpperCase()} (${asset.code.toUpperCase()})` : 'Ativo desconhecido';
                 const assetType = asset ? asset.type : 'Desconhecido';
                 const total = dividend.dividendValue + dividend.jcpValue;
@@ -1405,10 +1690,13 @@
         
         // Renderizar relatório completo com layout horizontal e abas expansíveis
         function renderFullReport() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
             const reportContainer = document.getElementById('fullReport');
             reportContainer.innerHTML = '';
             
-            if (db.assets.length === 0) {
+            if (brokerData.assets.length === 0) {
                 reportContainer.innerHTML = '<p style="text-align: center;">Nenhum ativo cadastrado para gerar relatório</p>';
                 return;
             }
@@ -1421,7 +1709,7 @@
             // Agrupar ativos por tipo
             const assetsByType = {};
             assetTypes.forEach(type => {
-                assetsByType[type] = db.assets.filter(asset => asset.type === type);
+                assetsByType[type] = brokerData.assets.filter(asset => asset.type === type);
             });
             
             // Criar container para as categorias (layout horizontal)
@@ -1468,7 +1756,7 @@
                 sortedAssets.forEach(asset => {
                     // Calcular dados do ativo
                     const assetData = calculateAssetData(asset.id);
-                    const assetDividends = db.dividends
+                    const assetDividends = brokerData.dividends
                         .filter(d => d.assetId === asset.id)
                         .sort((a, b) => new Date(a.date) - new Date(b.date));
                     
@@ -1598,6 +1886,9 @@
         
         // Atualizar dropdowns de ativos
         function updateAssetDropdowns() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
             const transactionAssetSelect = document.getElementById('transactionAsset');
             const dividendAssetSelect = document.getElementById('dividendAsset');
             
@@ -1606,9 +1897,8 @@
             dividendAssetSelect.innerHTML = '<option value="">Selecione um ativo</option>';
             
             // Ordenar ativos por tipo e nome
-            const sortedAssets = sortAssets(db.assets);
+            const sortedAssets = sortAssets(brokerData.assets);
             
-            // Adicionar opções agrupadas por tipo
             let currentType = null;
             
             sortedAssets.forEach(asset => {
@@ -1637,6 +1927,425 @@
             });
         }
         
+        // Inicializar gráficos
+        function initCharts() {
+            // Gráfico de evolução patrimonial
+            const netWorthCtx = document.getElementById('netWorthChart').getContext('2d');
+            netWorthChart = new Chart(netWorthCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Patrimônio Total (R$)',
+                        data: [],
+                        borderColor: '#4285F4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de performance comparada
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Seu Portfólio',
+                            data: [],
+                            borderColor: '#1a73e8',
+                            backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Benchmark',
+                            data: [],
+                            borderColor: '#EA4335',
+                            backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de distribuição de ativos
+            const assetDistributionCtx = document.getElementById('assetDistributionChart').getContext('2d');
+            assetDistributionChart = new Chart(assetDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de rendimentos mensais
+            const dividendsCtx = document.getElementById('dividendsChart').getContext('2d');
+            dividendsChart = new Chart(dividendsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Dividendos',
+                            data: Array(12).fill(0),
+                            backgroundColor: '#34A853',
+                            borderWidth: 0
+                        },
+                        {
+                            label: 'JCP',
+                            data: Array(12).fill(0),
+                            backgroundColor: '#FBBC05',
+                            borderWidth: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Atualizar gráficos com os dados iniciais
+            updateCharts();
+        }
+        
+        // Atualizar gráficos com os dados atuais
+        function updateCharts() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData || !netWorthChart || !performanceChart || !assetDistributionChart || !dividendsChart) return;
+            
+            // Calcular dados para os gráficos
+            const { netWorthData, assetDistributionData, dividendsData, performanceData } = calculateChartData();
+            
+            // Atualizar gráfico de evolução patrimonial
+            netWorthChart.data.labels = netWorthData.labels;
+            netWorthChart.data.datasets[0].data = netWorthData.values;
+            netWorthChart.update();
+            
+            // Atualizar gráfico de distribuição de ativos
+            assetDistributionChart.data.labels = assetDistributionData.labels;
+            assetDistributionChart.data.datasets[0].data = assetDistributionData.values;
+            assetDistributionChart.data.datasets[0].backgroundColor = assetDistributionData.colors;
+            assetDistributionChart.update();
+            
+            // Atualizar gráfico de rendimentos mensais
+            dividendsChart.data.datasets[0].data = dividendsData.dividends;
+            dividendsChart.data.datasets[1].data = dividendsData.jcp;
+            dividendsChart.update();
+            
+            // Atualizar tabela de impostos
+            updateTaxTable();
+            
+            // Atualizar gráfico de performance quando o benchmark mudar
+            document.getElementById('benchmarkSelect').addEventListener('change', function() {
+                const benchmark = this.value;
+                const benchmarkData = calculateBenchmarkData(benchmark, performanceData);
+                
+                performanceChart.data.labels = performanceData.labels;
+                performanceChart.data.datasets[0].data = performanceData.portfolio;
+                performanceChart.data.datasets[1].data = benchmarkData;
+                performanceChart.data.datasets[1].label = this.options[this.selectedIndex].text;
+                performanceChart.update();
+            });
+        }
+        
+        // Calcular dados para os gráficos
+        function calculateChartData() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return {
+                netWorthData: { labels: [], values: [] },
+                assetDistributionData: { labels: [], values: [], colors: [] },
+                dividendsData: { dividends: Array(12).fill(0), jcp: Array(12).fill(0) },
+                performanceData: { labels: [], portfolio: [] }
+            };
+            
+            // Dados para evolução patrimonial (últimos 12 meses)
+            const netWorthData = {
+                labels: [],
+                values: []
+            };
+            
+            // Dados para distribuição de ativos
+            const assetDistributionData = {
+                labels: [],
+                values: [],
+                colors: []
+            };
+            
+            // Dados para rendimentos mensais
+            const dividendsData = {
+                dividends: Array(12).fill(0),
+                jcp: Array(12).fill(0)
+            };
+            
+            // Dados para performance comparada
+            const performanceData = {
+                labels: [],
+                portfolio: []
+            };
+            
+            // Calcular distribuição de ativos
+            const assetsByType = {};
+            assetTypes.forEach(type => {
+                assetsByType[type] = {
+                    total: 0,
+                    color: assetTypeColors[type]
+                };
+            });
+            
+            brokerData.assets.forEach(asset => {
+                const assetData = calculateAssetData(asset.id);
+                assetsByType[asset.type].total += assetData.totalInvested;
+            });
+            
+            // Preencher dados de distribuição
+            for (const [type, data] of Object.entries(assetsByType)) {
+                if (data.total > 0) {
+                    assetDistributionData.labels.push(type);
+                    assetDistributionData.values.push(data.total);
+                    assetDistributionData.colors.push(data.color);
+                }
+            }
+            
+            // Calcular rendimentos mensais
+            const currentYear = new Date().getFullYear();
+            brokerData.dividends.forEach(dividend => {
+                const date = new Date(dividend.date);
+                if (date.getFullYear() === currentYear) {
+                    const month = date.getMonth();
+                    dividendsData.dividends[month] += dividend.dividendValue;
+                    dividendsData.jcp[month] += dividend.jcpValue;
+                }
+            });
+            
+            // Calcular evolução patrimonial (últimos 12 meses)
+            const now = new Date();
+            const months = [];
+            for (let i = 11; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push(date);
+                netWorthData.labels.push(date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }));
+            }
+            
+            months.forEach((month, index) => {
+                let total = 0;
+                
+                // Soma todas as transações até o mês atual
+                brokerData.transactions.forEach(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    if (transactionDate <= month) {
+                        total += transaction.quantity * transaction.price;
+                    }
+                });
+                
+                netWorthData.values.push(total);
+            });
+            
+            // Calcular dados de performance (variação percentual mês a mês)
+            if (netWorthData.values.length > 1) {
+                performanceData.labels = netWorthData.labels.slice(1);
+                
+                for (let i = 1; i < netWorthData.values.length; i++) {
+                    const prev = netWorthData.values[i - 1];
+                    const current = netWorthData.values[i];
+                    const change = prev > 0 ? ((current - prev) / prev) * 100 : 0;
+                    performanceData.portfolio.push(parseFloat(change.toFixed(2)));
+                }
+            }
+            
+            return {
+                netWorthData,
+                assetDistributionData,
+                dividendsData,
+                performanceData
+            };
+        }
+        
+        // Calcular dados do benchmark selecionado
+        function calculateBenchmarkData(benchmark, performanceData) {
+            // Valores fictícios para demonstração
+            // Em um sistema real, esses dados viriam de uma API de mercado
+            const benchmarkReturns = {
+                none: Array(performanceData.portfolio.length).fill(0),
+                ibov: [2.5, 3.1, -1.8, 4.2, -0.5, 1.7, 3.8, -2.1, 1.5, 2.9, 0.8, 1.2],
+                ifix: [1.8, 2.3, 0.5, 3.1, 1.2, 1.5, 2.8, -0.7, 1.8, 2.1, 1.2, 0.9],
+                cdi: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]
+            };
+            
+            // Pegar apenas os últimos N meses conforme os dados do portfólio
+            return benchmarkReturns[benchmark].slice(-performanceData.portfolio.length);
+        }
+        
+        // Atualizar tabela de impostos
+        function updateTaxTable() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
+            const tbody = document.getElementById('taxTable');
+            tbody.innerHTML = '';
+            
+            // Calcular impostos por tipo de ativo
+            const taxRates = {
+                "Ação": 0.15,
+                "FII": 0.20,
+                "BDR": 0.15,
+                "CDB": 0.15,
+                "Tesouro Direto": 0.15,
+                "Crypto": 0.15
+            };
+            
+            const taxData = {};
+            assetTypes.forEach(type => {
+                taxData[type] = {
+                    profit: 0,
+                    tax: 0,
+                    rate: taxRates[type]
+                };
+            });
+            
+            // Calcular lucro (simplificado - em um sistema real seria mais complexo)
+            brokerData.assets.forEach(asset => {
+                const assetData = calculateAssetData(asset.id);
+                const dividends = brokerData.dividends
+                    .filter(d => d.assetId === asset.id)
+                    .reduce((sum, d) => sum + d.dividendValue + d.jcpValue, 0);
+                
+                // Simulação: considerar 10% de valorização
+                const appreciation = assetData.totalInvested * 0.10;
+                taxData[asset.type].profit += dividends + appreciation;
+            });
+            
+            // Calcular imposto devido
+            for (const [type, data] of Object.entries(taxData)) {
+                data.tax = data.profit * data.rate;
+            }
+            
+            // Adicionar linhas na tabela
+            for (const [type, data] of Object.entries(taxData)) {
+                if (data.profit > 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${type}</td>
+                        <td>${formatCurrency(data.profit)}</td>
+                        <td>${formatCurrency(data.tax)}</td>
+                        <td>${(data.rate * 100).toFixed(0)}%</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+            
+            // Adicionar linha de total
+            const totalProfit = Object.values(taxData).reduce((sum, data) => sum + data.profit, 0);
+            const totalTax = Object.values(taxData).reduce((sum, data) => sum + data.tax, 0);
+            
+            if (totalProfit > 0) {
+                const totalRow = document.createElement('tr');
+                totalRow.style.fontWeight = 'bold';
+                totalRow.innerHTML = `
+                    <td>TOTAL</td>
+                    <td>${formatCurrency(totalProfit)}</td>
+                    <td>${formatCurrency(totalTax)}</td>
+                    <td></td>
+                `;
+                tbody.appendChild(totalRow);
+            }
+        }
+        
         // Modal de ativo
         function openAssetModal(assetId = null) {
             const modal = document.getElementById('assetModal');
@@ -1647,13 +2356,16 @@
             
             if (assetId) {
                 title.textContent = 'Editar Ativo';
-                const asset = db.assets.find(a => a.id === assetId);
-                if (asset) {
-                    document.getElementById('assetId').value = asset.id;
-                    document.getElementById('assetType').value = asset.type;
-                    document.getElementById('assetName').value = asset.name;
-                    document.getElementById('assetCode').value = asset.code;
-                    document.getElementById('assetCnpj').value = asset.cnpj || '';
+                const brokerData = getCurrentBrokerFullData();
+                if (brokerData) {
+                    const asset = brokerData.assets.find(a => a.id === assetId);
+                    if (asset) {
+                        document.getElementById('assetId').value = asset.id;
+                        document.getElementById('assetType').value = asset.type;
+                        document.getElementById('assetName').value = asset.name;
+                        document.getElementById('assetCode').value = asset.code;
+                        document.getElementById('assetCnpj').value = asset.cnpj || '';
+                    }
                 }
             } else {
                 title.textContent = 'Adicionar Ativo';
@@ -1664,6 +2376,9 @@
         }
         
         function saveAsset() {
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
             const form = document.getElementById('assetForm');
             const assetId = document.getElementById('assetId').value;
             const type = document.getElementById('assetType').value;
@@ -1677,7 +2392,7 @@
             }
             
             const assetData = {
-                id: assetId ? parseInt(assetId) : db.nextId++,
+                id: assetId ? parseInt(assetId) : appData.nextId++,
                 type,
                 name,
                 code,
@@ -1686,14 +2401,15 @@
             
             if (assetId) {
                 // Editar ativo existente
-                const index = db.assets.findIndex(a => a.id === parseInt(assetId));
+                const index = broker.assets.findIndex(a => a.id === parseInt(assetId));
                 if (index !== -1) {
-                    db.assets[index] = assetData;
+                    broker.assets[index] = assetData;
                     showNotification('Ativo atualizado com sucesso!');
                 }
             } else {
                 // Adicionar novo ativo
-                db.assets.push(assetData);
+                if (!broker.assets) broker.assets = [];
+                broker.assets.push(assetData);
                 showNotification('Ativo adicionado com sucesso!');
             }
             
@@ -1701,6 +2417,7 @@
             renderAssets();
             updateAssetDropdowns();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
@@ -1711,25 +2428,35 @@
         function deleteAsset(id) {
             if (!confirm('Tem certeza que deseja excluir este ativo?')) return;
             
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
             // Verificar se há transações ou rendimentos associados
-            const hasTransactions = db.transactions.some(t => t.assetId === id);
-            const hasDividends = db.dividends.some(d => d.assetId === id);
+            const hasTransactions = broker.transactions && broker.transactions.some(t => t.assetId === id);
+            const hasDividends = broker.dividends && broker.dividends.some(d => d.assetId === id);
             
             if (hasTransactions || hasDividends) {
                 showNotification('Não é possível excluir ativo com transações ou rendimentos associados', true);
                 return;
             }
             
-            db.assets = db.assets.filter(a => a.id !== id);
+            broker.assets = broker.assets.filter(a => a.id !== id);
             showNotification('Ativo excluído com sucesso!');
             renderAssets();
             updateAssetDropdowns();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
         // Modal de transação
         function openTransactionModal() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData || brokerData.assets.length === 0) {
+                showNotification('Cadastre pelo menos um ativo antes de adicionar transações', true);
+                return;
+            }
+            
             const modal = document.getElementById('transactionModal');
             const form = document.getElementById('transactionForm');
             
@@ -1740,6 +2467,9 @@
         }
         
         function saveTransaction() {
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
             const form = document.getElementById('transactionForm');
             const date = document.getElementById('transactionDate').value;
             const assetId = document.getElementById('transactionAsset').value;
@@ -1757,35 +2487,47 @@
             }
             
             const transaction = {
-                id: db.nextId++,
+                id: appData.nextId++,
                 date,
                 assetId: parseInt(assetId),
                 quantity,
                 price
             };
             
-            db.transactions.push(transaction);
+            if (!broker.transactions) broker.transactions = [];
+            broker.transactions.push(transaction);
             showNotification('Transação adicionada com sucesso!');
             document.getElementById('transactionModal').style.display = 'none';
             renderTransactions();
             renderAssets();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
         function deleteTransaction(id) {
             if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
             
-            db.transactions = db.transactions.filter(t => t.id !== id);
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
+            broker.transactions = broker.transactions.filter(t => t.id !== id);
             showNotification('Transação excluída com sucesso!');
             renderTransactions();
             renderAssets();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
         // Modal de rendimento
         function openDividendModal() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData || brokerData.assets.length === 0) {
+                showNotification('Cadastre pelo menos um ativo antes de adicionar rendimentos', true);
+                return;
+            }
+            
             const modal = document.getElementById('dividendModal');
             const form = document.getElementById('dividendForm');
             
@@ -1796,6 +2538,9 @@
         }
         
         function saveDividend() {
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
             const form = document.getElementById('dividendForm');
             const date = document.getElementById('dividendDate').value;
             const assetId = document.getElementById('dividendAsset').value;
@@ -1813,28 +2558,34 @@
             }
             
             const dividend = {
-                id: db.nextId++,
+                id: appData.nextId++,
                 date,
                 assetId: parseInt(assetId),
                 dividendValue,
                 jcpValue
             };
             
-            db.dividends.push(dividend);
+            if (!broker.dividends) broker.dividends = [];
+            broker.dividends.push(dividend);
             showNotification('Rendimento adicionado com sucesso!');
             document.getElementById('dividendModal').style.display = 'none';
             renderDividends();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
         function deleteDividend(id) {
             if (!confirm('Tem certeza que deseja excluir este rendimento?')) return;
             
-            db.dividends = db.dividends.filter(d => d.id !== id);
+            const broker = getCurrentBrokerData();
+            if (!broker) return;
+            
+            broker.dividends = broker.dividends.filter(d => d.id !== id);
             showNotification('Rendimento excluído com sucesso!');
             renderDividends();
             renderFullReport();
+            updateCharts();
             saveData();
         }
         
@@ -1895,27 +2646,504 @@
             printWindow.document.close();
         }
         
+        // Exportar para PDF
+        function exportToPdf() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(16);
+            doc.text('Relatório de Investimentos', 105, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 22, { align: 'center' });
+            
+            // Adicionar gráficos
+            const charts = [
+                { id: 'netWorthChart', title: 'Evolução Patrimonial', y: 30 },
+                { id: 'assetDistributionChart', title: 'Distribuição de Ativos', y: 80 },
+                { id: 'dividendsChart', title: 'Rendimentos Mensais', y: 130 }
+            ];
+            
+            let promiseChain = Promise.resolve();
+            
+            charts.forEach(chart => {
+                const canvas = document.getElementById(chart.id);
+                if (canvas) {
+                    promiseChain = promiseChain.then(() => {
+                        return new Promise(resolve => {
+                            const canvasImage = canvas.toDataURL('image/png', 1.0);
+                            doc.addImage(canvasImage, 'PNG', 15, chart.y, 180, 40);
+                            doc.text(chart.title, 15, chart.y - 5);
+                            resolve();
+                        });
+                    });
+                }
+            });
+            
+            // Adicionar tabela de impostos
+            promiseChain = promiseChain.then(() => {
+                doc.text('Cálculo de Impostos', 15, 180);
+                
+                const headers = ['Tipo de Ativo', 'Lucro (R$)', 'Imposto (R$)', 'Alíquota'];
+                const rows = [];
+                
+                // Calcular impostos
+                const taxRates = {
+                    "Ação": 0.15,
+                    "FII": 0.20,
+                    "BDR": 0.15,
+                    "CDB": 0.15,
+                    "Tesouro Direto": 0.15,
+                    "Crypto": 0.15
+                };
+                
+                const taxData = {};
+                assetTypes.forEach(type => {
+                    taxData[type] = {
+                        profit: 0,
+                        tax: 0,
+                        rate: taxRates[type]
+                    };
+                });
+                
+                const brokerData = getCurrentBrokerFullData();
+                if (brokerData) {
+                    brokerData.assets.forEach(asset => {
+                        const assetData = calculateAssetData(asset.id);
+                        const dividends = brokerData.dividends
+                            .filter(d => d.assetId === asset.id)
+                            .reduce((sum, d) => sum + d.dividendValue + d.jcpValue, 0);
+                        
+                        const appreciation = assetData.totalInvested * 0.10;
+                        taxData[asset.type].profit += dividends + appreciation;
+                    });
+                }
+                
+                for (const [type, data] of Object.entries(taxData)) {
+                    if (data.profit > 0) {
+                        data.tax = data.profit * data.rate;
+                        rows.push([
+                            type,
+                            formatCurrency(data.profit),
+                            formatCurrency(data.tax),
+                            `${(data.rate * 100).toFixed(0)}%`
+                        ]);
+                    }
+                }
+                
+                // Adicionar tabela ao PDF
+                doc.autoTable({
+                    startY: 185,
+                    head: [headers],
+                    body: rows,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [26, 115, 232]
+                    }
+                });
+                
+                // Adicionar total
+                const totalProfit = Object.values(taxData).reduce((sum, data) => sum + data.profit, 0);
+                const totalTax = Object.values(taxData).reduce((sum, data) => sum + data.tax, 0);
+                
+                if (totalProfit > 0) {
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 5,
+                        body: [
+                            ['TOTAL', formatCurrency(totalProfit), formatCurrency(totalTax), '']
+                        ],
+                        theme: 'grid',
+                        styles: {
+                            fontStyle: 'bold'
+                        }
+                    });
+                }
+                
+                return Promise.resolve();
+            });
+            
+            // Salvar PDF quando tudo estiver pronto
+            promiseChain.then(() => {
+                doc.save(`relatorio-investimentos-${new Date().toISOString().slice(0, 10)}.pdf`);
+                showNotification('Relatório exportado para PDF com sucesso!');
+            });
+        }
+        
+        // Exportar para Excel
+        function exportToExcel() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
+            // Criar workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Adicionar planilha de ativos
+            const assetsData = brokerData.assets.map(asset => {
+                const assetData = calculateAssetData(asset.id);
+                return {
+                    'Tipo': asset.type,
+                    'Ativo': asset.name,
+                    'Código': asset.code,
+                    'CNPJ': asset.cnpj || '-',
+                    'Quantidade': assetData.quantity,
+                    'Preço Médio': assetData.avgPrice,
+                    'Total Investido': assetData.totalInvested
+                };
+            });
+            
+            const assetsWS = XLSX.utils.json_to_sheet(assetsData);
+            XLSX.utils.book_append_sheet(wb, assetsWS, "Ativos");
+            
+            // Adicionar planilha de transações
+            const transactionsData = brokerData.transactions.map(transaction => {
+                const asset = brokerData.assets.find(a => a.id === transaction.assetId);
+                return {
+                    'Data': formatDate(transaction.date),
+                    'Tipo': asset ? asset.type : 'Desconhecido',
+                    'Ativo': asset ? `${asset.name} (${asset.code})` : 'Desconhecido',
+                    'Quantidade': transaction.quantity,
+                    'Valor Unitário': transaction.price,
+                    'Total': transaction.quantity * transaction.price
+                };
+            });
+            
+            const transactionsWS = XLSX.utils.json_to_sheet(transactionsData);
+            XLSX.utils.book_append_sheet(wb, transactionsWS, "Transações");
+            
+            // Adicionar planilha de rendimentos
+            const dividendsData = brokerData.dividends.map(dividend => {
+                const asset = brokerData.assets.find(a => a.id === dividend.assetId);
+                return {
+                    'Data': formatDate(dividend.date),
+                    'Tipo': asset ? asset.type : 'Desconhecido',
+                    'Ativo': asset ? `${asset.name} (${asset.code})` : 'Desconhecido',
+                    'Dividendos': dividend.dividendValue,
+                    'JCP': dividend.jcpValue,
+                    'Total': dividend.dividendValue + dividend.jcpValue
+                };
+            });
+            
+            const dividendsWS = XLSX.utils.json_to_sheet(dividendsData);
+            XLSX.utils.book_append_sheet(wb, dividendsWS, "Rendimentos");
+            
+            // Adicionar planilha de resumo
+            const summaryData = [];
+            
+            // Resumo por tipo de ativo
+            const assetsByType = {};
+            assetTypes.forEach(type => {
+                assetsByType[type] = {
+                    totalInvested: 0,
+                    dividends: 0,
+                    jcp: 0
+                };
+            });
+            
+            brokerData.assets.forEach(asset => {
+                const assetData = calculateAssetData(asset.id);
+                assetsByType[asset.type].totalInvested += assetData.totalInvested;
+                
+                const assetDividends = brokerData.dividends.filter(d => d.assetId === asset.id);
+                assetsByType[asset.type].dividends += assetDividends.reduce((sum, d) => sum + d.dividendValue, 0);
+                assetsByType[asset.type].jcp += assetDividends.reduce((sum, d) => sum + d.jcpValue, 0);
+            });
+            
+            for (const [type, data] of Object.entries(assetsByType)) {
+                if (data.totalInvested > 0) {
+                    const totalIncome = data.dividends + data.jcp;
+                    const yieldPercentage = data.totalInvested > 0 ? (totalIncome / data.totalInvested * 100) : 0;
+                    
+                    summaryData.push({
+                        'Categoria': type,
+                        'Total Investido': data.totalInvested,
+                        'Dividendos': data.dividends,
+                        'JCP': data.jcp,
+                        'Rendimento Total': totalIncome,
+                        'Rentabilidade': `${yieldPercentage.toFixed(2)}%`
+                    });
+                }
+            }
+            
+            // Total geral
+            const totalInvested = summaryData.reduce((sum, item) => sum + item['Total Investido'], 0);
+            const totalDividends = summaryData.reduce((sum, item) => sum + item['Dividendos'], 0);
+            const totalJCP = summaryData.reduce((sum, item) => sum + item['JCP'], 0);
+            const totalIncome = totalDividends + totalJCP;
+            const totalYield = totalInvested > 0 ? (totalIncome / totalInvested * 100) : 0;
+            
+            summaryData.push({
+                'Categoria': 'TOTAL GERAL',
+                'Total Investido': totalInvested,
+                'Dividendos': totalDividends,
+                'JCP': totalJCP,
+                'Rendimento Total': totalIncome,
+                'Rentabilidade': `${totalYield.toFixed(2)}%`
+            });
+            
+            const summaryWS = XLSX.utils.json_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summaryWS, "Resumo");
+            
+            // Gerar arquivo Excel
+            XLSX.writeFile(wb, `relatorio-investimentos-${new Date().toISOString().slice(0, 10)}.xlsx`);
+            showNotification('Relatório exportado para Excel com sucesso!');
+        }
+        
+        // Gerar DARF (simulação)
+        function generateDarf() {
+            const brokerData = getCurrentBrokerFullData();
+            if (!brokerData) return;
+            
+            // Calcular impostos totais
+            const taxRates = {
+                "Ação": 0.15,
+                "FII": 0.20,
+                "BDR": 0.15,
+                "CDB": 0.15,
+                "Tesouro Direto": 0.15,
+                "Crypto": 0.15
+            };
+            
+            let totalTax = 0;
+            
+            brokerData.assets.forEach(asset => {
+                const assetData = calculateAssetData(asset.id);
+                const dividends = brokerData.dividends
+                    .filter(d => d.assetId === asset.id)
+                    .reduce((sum, d) => sum + d.dividendValue + d.jcpValue, 0);
+                
+                const appreciation = assetData.totalInvested * 0.10;
+                const profit = dividends + appreciation;
+                totalTax += profit * taxRates[asset.type];
+            });
+            
+            if (totalTax <= 0) {
+                showNotification('Nenhum imposto a pagar no momento', true);
+                return;
+            }
+            
+            // Simular geração de DARF
+            const darfWindow = window.open('', '_blank');
+            darfWindow.document.write(`
+                <html>
+                <head>
+                    <title>DARF Gerado</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .darf-container { max-width: 600px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; }
+                        .darf-header { text-align: center; margin-bottom: 20px; }
+                        .darf-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                        .darf-info { margin-bottom: 15px; }
+                        .darf-info table { width: 100%; border-collapse: collapse; }
+                        .darf-info th, .darf-info td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+                        .darf-info th { background-color: #f2f2f2; }
+                        .darf-footer { margin-top: 20px; text-align: center; font-size: 12px; color: #666; }
+                        .no-print { margin-top: 20px; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="darf-container">
+                        <div class="darf-header">
+                            <div class="darf-title">DOCUMENTO DE ARRECADAÇÃO DE RECEITAS FEDERAIS (DARF)</div>
+                            <div>Autogeração para Declaração de Imposto de Renda</div>
+                        </div>
+                        
+                        <div class="darf-info">
+                            <table>
+                                <tr>
+                                    <th>Código da Receita</th>
+                                    <td>6015</td>
+                                </tr>
+                                <tr>
+                                    <th>Período de Apuração</th>
+                                    <td>${new Date().getFullYear()}</td>
+                                </tr>
+                                <tr>
+                                    <th>Vencimento</th>
+                                    <td>Último dia útil do mês seguinte ao da apuração</td>
+                                </tr>
+                                <tr>
+                                    <th>Valor (R$)</th>
+                                    <td>${formatCurrency(totalTax)}</td>
+                                </tr>
+                                <tr>
+                                    <th>CPF/CNPJ</th>
+                                    <td>Informe seu CPF/CNPJ</td>
+                                </tr>
+                                <tr>
+                                    <th>Nome</th>
+                                    <td>Informe seu nome completo</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="darf-footer">
+                            <p>Este é um documento simulado para fins de demonstração.</p>
+                            <p>Consulte um contador para gerar o DARF oficial.</p>
+                        </div>
+                        
+                        <div class="no-print">
+                            <button onclick="window.print()" style="padding: 8px 16px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                                Imprimir
+                            </button>
+                            <button onclick="window.close()" style="padding: 8px 16px; background-color: #d93025; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            darfWindow.document.close();
+            
+            showNotification('DARF simulado gerado com sucesso!');
+        }
+        
+        // Renderizar lista de corretoras
+        function renderBrokerList() {
+            const brokerList = document.getElementById('brokerList');
+            brokerList.innerHTML = '<h3>Suas Corretoras:</h3>';
+            
+            if (appData.brokers.length === 0) {
+                brokerList.innerHTML += '<p>Nenhuma corretora cadastrada</p>';
+                return;
+            }
+            
+            appData.brokers.forEach(broker => {
+                const brokerItem = document.createElement('div');
+                brokerItem.className = `broker-item ${broker.id === appData.currentBrokerId ? 'current-broker' : ''}`;
+                brokerItem.innerHTML = `
+                    <div class="broker-item-name">${broker.name}</div>
+                    <div class="broker-item-actions">
+                        <button class="button secondary small" onclick="selectBroker(${broker.id})">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="button danger small" onclick="deleteBroker(${broker.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                brokerList.appendChild(brokerItem);
+            });
+        }
+        
+        // Criar ou selecionar corretora
+        function createOrSelectBroker() {
+            const brokerName = document.getElementById('brokerName').value.trim();
+            if (!brokerName) {
+                showNotification('Digite o nome da corretora', true);
+                return;
+            }
+            
+            // Verificar se já existe uma corretora com esse nome
+            const existingBroker = appData.brokers.find(b => b.name.toLowerCase() === brokerName.toLowerCase());
+            
+            if (existingBroker) {
+                // Selecionar corretora existente
+                selectBroker(existingBroker.id);
+            } else {
+                // Criar nova corretora
+                const newBroker = {
+                    id: appData.nextBrokerId++,
+                    name: brokerName,
+                    assets: [],
+                    transactions: [],
+                    dividends: []
+                };
+                
+                appData.brokers.push(newBroker);
+                selectBroker(newBroker.id);
+                showNotification(`Corretora "${brokerName}" criada com sucesso!`);
+            }
+        }
+        
+        // Selecionar corretora
+        function selectBroker(brokerId) {
+            appData.currentBrokerId = brokerId;
+            saveData();
+            
+            // Atualizar interface
+            const broker = appData.brokers.find(b => b.id === brokerId);
+            if (broker) {
+                document.getElementById('currentBrokerName').textContent = broker.name;
+                document.getElementById('brokerSelectionScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                
+                // Renderizar dados da corretora selecionada
+                renderAssets();
+                renderTransactions();
+                renderDividends();
+                updateAssetDropdowns();
+                renderFullReport();
+                initCharts();
+            }
+        }
+        
+        // Excluir corretora
+        function deleteBroker(brokerId) {
+            if (!confirm('Tem certeza que deseja excluir esta corretora e todos os seus dados?')) return;
+            
+            appData.brokers = appData.brokers.filter(b => b.id !== brokerId);
+            
+            if (appData.currentBrokerId === brokerId) {
+                appData.currentBrokerId = null;
+                document.getElementById('brokerSelectionScreen').style.display = 'block';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+            
+            showNotification('Corretora excluída com sucesso!');
+            renderBrokerList();
+            saveData();
+        }
+        
+        // Trocar de corretora
+        function changeBroker() {
+            document.getElementById('brokerSelectionScreen').style.display = 'block';
+            document.getElementById('appContainer').style.display = 'none';
+            renderBrokerList();
+        }
+        
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             // Carregar dados salvos
             loadData();
             
-            // Configurar interface
-            setupTabs();
-            setupMobileMenu();
-            renderAssets();
-            renderTransactions();
-            renderDividends();
-            updateAssetDropdowns();
-            renderFullReport();
+            // Renderizar lista de corretoras
+            renderBrokerList();
+            
+            // Se já houver uma corretora selecionada, mostrar o app diretamente
+            if (appData.currentBrokerId) {
+                const broker = appData.brokers.find(b => b.id === appData.currentBrokerId);
+                if (broker) {
+                    document.getElementById('currentBrokerName').textContent = broker.name;
+                    document.getElementById('brokerSelectionScreen').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'block';
+                    
+                    // Configurar interface
+                    setupTabs();
+                    setupMobileMenu();
+                    renderAssets();
+                    renderTransactions();
+                    renderDividends();
+                    updateAssetDropdowns();
+                    renderFullReport();
+                    initCharts();
+                }
+            }
+            
+            // Botões da tela de seleção de corretora
+            document.getElementById('createBrokerBtn').addEventListener('click', createOrSelectBroker);
+            document.getElementById('changeBrokerBtn').addEventListener('click', changeBroker);
             
             // Botões de abertura de modal
             document.getElementById('addAssetBtn').addEventListener('click', () => openAssetModal());
             document.getElementById('addTransactionBtn').addEventListener('click', openTransactionModal);
             document.getElementById('addDividendBtn').addEventListener('click', openDividendModal);
             
-            // Botão de imprimir relatório
+            // Botões de exportação
             document.getElementById('printReportBtn').addEventListener('click', printReport);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportToPdf);
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('generateDarfBtn').addEventListener('click', generateDarf);
             
             // Botões de salvar
             document.getElementById('saveAssetBtn').addEventListener('click', saveAsset);
