@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Ativos para IR</title>
+    <title>Gerenciador Financeiro de Ativos IR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1277,12 +1277,12 @@
             const broker = getCurrentBrokerData();
             if (!broker) return null;
             
-            return {
-                ...broker,
-                assets: broker.assets || [],
-                transactions: broker.transactions || [],
-                dividends: broker.dividends || []
-            };
+            // Garantir que os arrays existam
+            broker.assets = broker.assets || [];
+            broker.transactions = broker.transactions || [];
+            broker.dividends = broker.dividends || [];
+            
+            return broker;
         }
         
         // Carregar dados do localStorage
@@ -1294,6 +1294,13 @@
                 appData.currentBrokerId = parsedData.currentBrokerId || null;
                 appData.nextBrokerId = parsedData.nextBrokerId || 1;
                 appData.nextId = parsedData.nextId || 1;
+                
+                // Garantir que cada broker tenha os arrays necessários
+                appData.brokers.forEach(broker => {
+                    broker.assets = broker.assets || [];
+                    broker.transactions = broker.transactions || [];
+                    broker.dividends = broker.dividends || [];
+                });
             }
         }
         
@@ -3075,6 +3082,10 @@
                 updateAssetDropdowns();
                 renderFullReport();
                 initCharts();
+                
+                // Configurar interface
+                setupTabs();
+                setupMobileMenu();
             }
         }
         
